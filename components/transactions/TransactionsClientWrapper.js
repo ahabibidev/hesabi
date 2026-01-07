@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import TransactionsHeader from "./TransactionsHeader";
+import Header from "../header/Header";
 import TransactionsFilters from "./TransactionsFilters";
 import TransactionsTableView from "./TransactionsTableView";
 import TransactionsPagination from "./TransactionsPagination";
@@ -102,7 +102,6 @@ export default function TransactionsClientWrapper({ initialTransactions }) {
     setTransactions((prev) => [transactionToAdd, ...prev]);
     setIsAddModalOpen(false);
     setCurrentPage(1);
-    console.log("Transaction added:", transactionToAdd);
   }, []);
 
   const handleUpdateTransaction = useCallback((updatedTransaction) => {
@@ -132,7 +131,12 @@ export default function TransactionsClientWrapper({ initialTransactions }) {
 
   return (
     <>
-      <TransactionsHeader onAddTransaction={handleAddTransaction} />
+      <Header
+        buttonText={"Add New Transaction"}
+        pageHeader={"Transactions"}
+        pageSubHeader={"View and manage all your financial transactions"}
+        onAddTransaction={handleAddTransaction}
+      />
 
       <div className="rounded-xl sm:rounded-2xl border border-text/10 bg-background dark:bg-linear-45 dark:from-background dark:to-primary/20 p-4 sm:p-6 shadow-lg">
         <ActiveFilters

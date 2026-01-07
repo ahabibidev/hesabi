@@ -151,3 +151,34 @@ export const allTransactions = [
     description: "Streaming service",
   },
 ];
+
+export const Budgets = [
+  {
+    id: 1,
+    name: "Entertainment",
+    max: 50.0,
+    spend: 20.0,
+    color: "bg-teal-600",
+  },
+  {
+    id: 2,
+    name: "Personal Care",
+    max: 200.0,
+    spend: 140.0,
+    color: "bg-orange-500",
+  },
+  {
+    id: 3,
+    name: "Transportation",
+    max: 100.0,
+    spend: 40.0,
+    color: "bg-purple-600",
+  },
+  {
+    id: 4,
+    name: "Bills",
+    max: 800.0,
+    spend: 450.0,
+    color: "bg-sky-400",
+  },
+];

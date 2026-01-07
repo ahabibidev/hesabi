@@ -301,7 +301,7 @@ export default function AddTransactionModal({
               </button>
               <button
                 type="submit"
-                className="flex-1 px-4 py-3 rounded-lg bg-foreground hover:bg-primary text-background font-semibold shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200"
+                className="flex-1 px-4 py-3 rounded-lg bg-foreground hover:bg-primary/20 hover:text-foreground text-background font-semibold shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200"
               >
                 {editingTransaction ? "Update" : "Add"}
               </button>
