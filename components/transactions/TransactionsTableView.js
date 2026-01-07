@@ -5,6 +5,8 @@ export default function TransactionsTableView({
   transactions,
   searchTerm,
   onClearFilters,
+  onEdit,
+  onHide,
 }) {
   if (transactions.length === 0) {
     return (
@@ -73,8 +75,16 @@ export default function TransactionsTableView({
         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
           {transactions.map((tx) => (
             <tr key={tx.id}>
-              <TransactionDesktopRow transaction={tx} />
-              <TransactionMobileRow transaction={tx} />
+              <TransactionDesktopRow
+                transaction={tx}
+                onEdit={onEdit}
+                onHide={onHide}
+              />
+              <TransactionMobileRow
+                transaction={tx}
+                onEdit={onEdit}
+                onHide={onHide}
+              />
             </tr>
           ))}
         </tbody>

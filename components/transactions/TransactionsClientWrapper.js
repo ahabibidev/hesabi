@@ -6,6 +6,7 @@ import TransactionsFilters from "./TransactionsFilters";
 import TransactionsTableView from "./TransactionsTableView";
 import TransactionsPagination from "./TransactionsPagination";
 import ActiveFilters from "./ActiveFilters";
+import AddTransactionModal from "./AddTransactionModal";
 import { filterTransactions, sortTransactions } from "@/utils/transactionUtils";
 
 export default function TransactionsClientWrapper({ initialTransactions }) {
@@ -14,19 +15,27 @@ export default function TransactionsClientWrapper({ initialTransactions }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [transactions, setTransactions] = useState(initialTransactions);
 
   console.log("Initial Transactions:", initialTransactions);
   const itemsPerPage = 7;
 
+  // Update transactions when initialTransactions changes (for SSR/SSG)
+  useEffect(() => {
+    setTransactions(initialTransactions);
+  }, [initialTransactions]);
+
   // Memoized filtered and sorted transactions
   const filteredTransactions = useMemo(() => {
-    const filtered = filterTransactions(initialTransactions, {
+    const filtered = filterTransactions(transactions, {
       searchTerm,
       categoryFilter,
       typeFilter,
     });
     return sortTransactions(filtered, sortBy);
-  }, [initialTransactions, searchTerm, sortBy, categoryFilter, typeFilter]);
+  }, [transactions, searchTerm, sortBy, categoryFilter, typeFilter]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
@@ -57,7 +66,68 @@ export default function TransactionsClientWrapper({ initialTransactions }) {
   }, []);
 
   const handleAddTransaction = useCallback(() => {
-    alert("Add new transaction form would open here");
+    setEditingTransaction(null);
+    setIsAddModalOpen(true);
+  }, []);
+
+  const handleEditTransaction = useCallback((transaction) => {
+    setEditingTransaction(transaction);
+    setIsAddModalOpen(true);
+  }, []);
+
+  const handleHideTransaction = useCallback(
+    (id) => {
+      setTransactions((prev) => prev.filter((t) => t.id !== id));
+      // Reset to first page if we're on a page that might now be empty
+      if (currentTransactions.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    },
+    [currentTransactions.length, currentPage]
+  );
+
+  const handleSaveNewTransaction = useCallback((newTransaction) => {
+    const transactionToAdd = {
+      ...newTransaction,
+      id: Date.now(),
+      date: new Date(newTransaction.date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }),
+      amount: parseFloat(newTransaction.amount),
+      type: newTransaction.type === "income" ? "Income" : "Expense",
+    };
+
+    setTransactions((prev) => [transactionToAdd, ...prev]);
+    setIsAddModalOpen(false);
+    setCurrentPage(1);
+    console.log("Transaction added:", transactionToAdd);
+  }, []);
+
+  const handleUpdateTransaction = useCallback((updatedTransaction) => {
+    setTransactions((prev) =>
+      prev.map((t) =>
+        t.id === updatedTransaction.id
+          ? {
+              ...updatedTransaction,
+              date: new Date(updatedTransaction.date).toLocaleDateString(
+                "en-US",
+                {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                }
+              ),
+              amount: parseFloat(updatedTransaction.amount),
+              type: updatedTransaction.type === "income" ? "Income" : "Expense",
+            }
+          : t
+      )
+    );
+    setIsAddModalOpen(false);
+    setEditingTransaction(null);
+    console.log("Transaction updated:", updatedTransaction);
   }, []);
 
   return (
@@ -92,6 +162,8 @@ export default function TransactionsClientWrapper({ initialTransactions }) {
           transactions={currentTransactions}
           searchTerm={searchTerm}
           onClearFilters={clearFilters}
+          onEdit={handleEditTransaction}
+          onHide={handleHideTransaction}
         />
 
         {currentTransactions.length > 0 && (
@@ -101,11 +173,22 @@ export default function TransactionsClientWrapper({ initialTransactions }) {
             startIndex={startIndex}
             endIndex={endIndex}
             totalFiltered={filteredTransactions.length}
-            totalAll={initialTransactions.length}
+            totalAll={transactions.length}
             onPageChange={handlePageChange}
           />
         )}
       </div>
+
+      <AddTransactionModal
+        isOpen={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingTransaction(null);
+        }}
+        onAddTransaction={handleSaveNewTransaction}
+        onUpdateTransaction={handleUpdateTransaction}
+        editingTransaction={editingTransaction}
+      />
     </>
   );
 }

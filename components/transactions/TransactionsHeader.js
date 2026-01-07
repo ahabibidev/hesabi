@@ -30,7 +30,7 @@ export default function TransactionsHeader({ onAddTransaction }) {
       {/* Desktop Add Button */}
       <button
         onClick={onAddTransaction}
-        className="hidden sm:flex items-center gap-2 rounded-lg bg-foreground hover:bg-primary transition-all duration-200 px-5 py-3 font-semibold text-background shadow-lg hover:shadow-xl active:scale-95"
+        className="hidden sm:flex items-center gap-2 rounded-lg bg-foreground hover:bg-primary/20 hover:text-foreground transition-all duration-200 px-5 py-3 font-semibold text-background shadow-lg hover:shadow-xl active:scale-95"
       >
         <FiPlus className="text-xl" />
         Add New Transaction

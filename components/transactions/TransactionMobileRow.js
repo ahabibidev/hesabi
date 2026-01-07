@@ -5,17 +5,15 @@ import Image from "next/image";
 import { FiMoreVertical } from "react-icons/fi";
 import { formatAmount, getAmountColor } from "@/utils/transactionUtils";
 
-function TransactionMobileRow({ transaction }) {
+function TransactionMobileRow({ transaction, onEdit, onHide }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleView = () => {
-    alert(`Viewing transaction #${transaction.id}`);
-    setMenuOpen(false);
+  const handleHide = () => {
+    onHide(transaction.id);
   };
 
   const handleEdit = () => {
-    alert(`Editing transaction #${transaction.id}`);
-    setMenuOpen(false);
+    onEdit(transaction);
   };
 
   const handleDelete = () => {
@@ -30,7 +28,7 @@ function TransactionMobileRow({ transaction }) {
       {/* Name + Category */}
       <td className="py-3 px-2 md:hidden">
         <div className="flex items-center gap-3">
-          <div className="relative flex-shrink-0">
+          <div className="relative shrink-0">
             <Image
               src={transaction.avatar}
               className="h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800"
@@ -86,10 +84,10 @@ function TransactionMobileRow({ transaction }) {
             />
             <div className="absolute right-4 top-8 z-50 bg-background border border-text/20 rounded-lg shadow-lg py-2 w-40 animate-fade-in">
               <button
-                onClick={handleView}
+                onClick={handleHide}
                 className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
-                View Details
+                Hide Row
               </button>
               <button
                 onClick={handleEdit}
