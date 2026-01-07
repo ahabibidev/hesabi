@@ -1,15 +1,15 @@
 // app/dashboard/layout.jsx
-// import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-// import { getServerSession } from "next-auth";
-// import { redirect } from "next/navigation";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import SideBar from "@/components/sidebar/Sidebar";
 
-export default function DashboardLayout({ children }) {
-  // const session = await getServerSession(authOptions);
+export default async function DashboardLayout({ children }) {
+  const session = await getServerSession(authOptions);
 
-  // if (!session) {
-  //   redirect("/login");
-  // }
+  if (!session) {
+    redirect("/login");
+  }
 
   return (
     <div className="flex h-screen overflow-hidden">
