@@ -283,33 +283,106 @@ export const allTransactions = [
   },
 ];
 
-export const Budgets = [
+// Initial budgets data
+export const initialBudgets = [
   {
     id: 1,
     name: "Entertainment",
-    max: 50.0,
-    spend: 20.0,
+    max: 50,
     color: "bg-teal-600",
+    spend: 0,
   },
   {
     id: 2,
-    name: "Personal Care",
-    max: 200.0,
-    spend: 140.0,
+    name: "Bills",
+    max: 750,
     color: "bg-orange-500",
+    spend: 0,
   },
   {
     id: 3,
-    name: "Transportation",
-    max: 100.0,
-    spend: 40.0,
+    name: "Dining",
+    max: 75,
     color: "bg-purple-600",
+    spend: 0,
   },
   {
     id: 4,
-    name: "Bills",
-    max: 800.0,
-    spend: 450.0,
+    name: "Personal Care",
+    max: 100,
     color: "bg-sky-400",
+    spend: 0,
   },
+];
+
+export const themeColors = [
+  { name: "Teal", value: "teal-600", bgClass: "bg-teal-600", hex: "#0d9488" },
+  {
+    name: "Orange",
+    value: "orange-500",
+    bgClass: "bg-orange-500",
+    hex: "#f97316",
+  },
+  {
+    name: "Purple",
+    value: "purple-600",
+    bgClass: "bg-purple-600",
+    hex: "#9333ea",
+  },
+  { name: "Sky", value: "sky-400", bgClass: "bg-sky-400", hex: "#38bdf8" },
+  {
+    name: "Green",
+    value: "green-500",
+    bgClass: "bg-green-500",
+    hex: "#22c55e",
+  },
+  { name: "Pink", value: "pink-500", bgClass: "bg-pink-500", hex: "#ec4899" },
+  {
+    name: "Indigo",
+    value: "indigo-500",
+    bgClass: "bg-indigo-500",
+    hex: "#6366f1",
+  },
+  {
+    name: "Amber",
+    value: "amber-500",
+    bgClass: "bg-amber-500",
+    hex: "#f59e0b",
+  },
+  { name: "Red", value: "red-500", bgClass: "bg-red-500", hex: "#ef4444" },
+  { name: "Blue", value: "blue-500", bgClass: "bg-blue-500", hex: "#3b82f6" },
+  {
+    name: "Emerald",
+    value: "emerald-500",
+    bgClass: "bg-emerald-500",
+    hex: "#10b981",
+  },
+  { name: "Rose", value: "rose-500", bgClass: "bg-rose-500", hex: "#f43f5e" },
+  {
+    name: "Violet",
+    value: "violet-500",
+    bgClass: "bg-violet-500",
+    hex: "#8b5cf6",
+  },
+  {
+    name: "Fuchsia",
+    value: "fuchsia-500",
+    bgClass: "bg-fuchsia-500",
+    hex: "#d946ef",
+  },
+  { name: "Cyan", value: "cyan-500", bgClass: "bg-cyan-500", hex: "#06b6d4" },
+  { name: "Lime", value: "lime-500", bgClass: "bg-lime-500", hex: "#84cc16" },
+];
+
+export const categories = [
+  "Entertainment",
+  "Groceries",
+  "Dining",
+  "Transportation",
+  "Shopping",
+  "Bills",
+  "Personal Care",
+  "Healthcare",
+  "Education",
+  "Other",
 ];
