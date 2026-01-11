@@ -214,7 +214,7 @@ export default function RecurringBills() {
               {/* Table Header */}
               <div className="flex  w-full border-b border-text/20 pb-3">
                 <div className="flex-1 text-text font-medium">Bill Title</div>
-                <div className="hidden md:flex-1 text-text font-medium">
+                <div className="hidden md:block flex-1 text-text font-medium">
                   Due Date
                 </div>
                 <div className="col-span-2 text-text font-medium">Amount</div>
@@ -234,19 +234,19 @@ export default function RecurringBills() {
                           alt={`${bill.name} avatar`}
                           unoptimized // For external images
                         />
-                        <div className="flex  flex-col">
+                        <div className="flex flex-col">
                           <p className="font-semibold truncate max-w-[200px]">
                             {bill.name}
                           </p>
                           <p className="md:block hidden text-sm text-text/70 truncate max-w-[200px]">
                             {bill.category} • {bill.description}
                           </p>
-                          <span className="md:gidden px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                          <span className="md:hidden px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
                             {formatDueDate(bill.date)}
                           </span>
                         </div>
                       </div>
-                      <div className="hidden md:flex-1">
+                      <div className="hidden md:block flex-1">
                         <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
                           {formatDueDate(bill.date)}
                         </span>
