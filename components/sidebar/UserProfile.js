@@ -1,8 +1,10 @@
+import cat from "@/public/avatars/cat.png";
+import Image from "next/image";
+
 export default function UserProfile({
   isCollapsed,
   name = "John Doe",
   email = "john@example.com",
-  initials = "JD",
 }) {
   return (
     <div className="p-6 border-b border-gray-700">
@@ -12,10 +14,7 @@ export default function UserProfile({
         }`}
       >
         <div className="relative">
-          <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-lg font-bold">
-            {initials}
-          </div>
-          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800"></div>
+          <Image src={cat} alt="user-image" width={45} height={45} />
         </div>
         {!isCollapsed && (
           <div className="flex-1 overflow-hidden">
