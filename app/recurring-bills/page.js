@@ -15,7 +15,7 @@ export default function RecurringBills() {
 
   // State for search and sort
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("name"); // name, date, amount
+  const [sortBy, setSortBy] = useState("name");
 
   // Filter and sort logic
   const filteredAndSortedBills = useMemo(() => {
@@ -38,7 +38,6 @@ export default function RecurringBills() {
         result.sort((a, b) => a.name.localeCompare(b.name));
         break;
       case "date":
-        // Parse dates for proper sorting
         result.sort((a, b) => {
           const dateA = new Date(a.date);
           const dateB = new Date(b.date);
@@ -82,6 +81,52 @@ export default function RecurringBills() {
     return `Monthly ${day}${suffix}`;
   };
 
+  // Get current date
+  const currentDate = new Date();
+  const currentDay = currentDate.getDate();
+
+  // Calculate summary metrics
+  const getSummaryMetrics = useMemo(() => {
+    let paidBillsCount = 0;
+    let paidBillsAmount = 0;
+    let upcomingBillsCount = 0;
+    let upcomingBillsAmount = 0;
+    let dueSoonBillsCount = 0;
+    let dueSoonBillsAmount = 0;
+
+    recurringBills.forEach((bill) => {
+      const billDate = new Date(bill.date);
+      const billDay = billDate.getDate();
+      const billAmount = Math.abs(bill.amount);
+
+      // Check if bill is paid (date has passed)
+      if (billDay < currentDay) {
+        paidBillsCount++;
+        paidBillsAmount += billAmount;
+      } else {
+        // Bill is upcoming
+        upcomingBillsCount++;
+        upcomingBillsAmount += billAmount;
+
+        // Check if bill is due soon (within 5 days)
+        const daysUntilDue = billDay - currentDay;
+        if (daysUntilDue >= 0 && daysUntilDue <= 5) {
+          dueSoonBillsCount++;
+          dueSoonBillsAmount += billAmount;
+        }
+      }
+    });
+
+    return {
+      paidBillsCount,
+      paidBillsAmount,
+      upcomingBillsCount,
+      upcomingBillsAmount,
+      dueSoonBillsCount,
+      dueSoonBillsAmount,
+    };
+  }, [recurringBills]);
+
   return (
     <DashboardLayout>
       <Header
@@ -104,29 +149,24 @@ export default function RecurringBills() {
           <div className="flex flex-col gap-5 w-full text-foreground bg-background shadow-xl dark:bg-linear-45 dark:from-background dark:to-primary/20 border border-text/10 p-6 rounded-2xl">
             <h2 className="font-bold text-xl">Summary</h2>
             <div className="flex justify-between pb-3 border-b border-text/20">
-              <p className="text-text">Total Bills</p>
+              <p className="text-text">Paid Bills</p>
               <p className="font-bold">
-                {totalBills} ({formatAmount(totalAmount)})
+                {getSummaryMetrics.paidBillsCount} (
+                {formatAmount(getSummaryMetrics.paidBillsAmount)})
               </p>
             </div>
             <div className="flex justify-between pb-3 border-b border-text/20">
-              <p className="text-text">Categories</p>
+              <p className="text-text">Total Upcoming</p>
               <p className="font-bold">
-                {
-                  [
-                    ...new Set(
-                      filteredAndSortedBills.map((bill) => bill.category)
-                    ),
-                  ].length
-                }
+                {getSummaryMetrics.upcomingBillsCount} (
+                {formatAmount(getSummaryMetrics.upcomingBillsAmount)})
               </p>
             </div>
-            <div className="flex justify-between">
-              <p className="text-text">Avg. Bill Amount</p>
+            <div className="flex text-red-500 justify-between pb-3 border-b border-text/20">
+              <p>Due Soon</p>
               <p className="font-bold">
-                {totalBills > 0
-                  ? formatAmount(totalAmount / totalBills)
-                  : "$0.00"}
+                {getSummaryMetrics.dueSoonBillsCount} (
+                {formatAmount(getSummaryMetrics.dueSoonBillsAmount)})
               </p>
             </div>
           </div>
@@ -168,7 +208,7 @@ export default function RecurringBills() {
 
           {/* Bills Table */}
           {filteredAndSortedBills.length > 0 ? (
-            <div className="flex flex-col w-full  overflow-x-auto">
+            <div className="flex flex-col w-full  justify-center overflow-x-auto">
               {/* Table Header */}
               <div className="flex  w-full border-b border-text/20 pb-3">
                 <div className="flex-1 text-text font-medium">Bill Title</div>
@@ -228,7 +268,7 @@ export default function RecurringBills() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex flex-col items-center h-full justify-center py-16 text-center">
               <RiBillLine className="text-5xl text-text/30 mb-4" />
               <h3 className="text-xl font-semibold mb-2">
                 {searchTerm ? "No matching bills found" : "No recurring bills"}
