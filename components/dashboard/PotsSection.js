@@ -1,8 +1,26 @@
+// components/dashboard/PotsSection.jsx
 import { BsPiggyBank } from "react-icons/bs";
 import SectionHeader from "./SectionHeader";
 import PotItem from "./PotItem";
+import { formatCurrency } from "@/lib/constants";
 
-export default function PotsSection({ potsData, totalSaved }) {
+export default function PotsSection({
+  potsData,
+  totalSaved,
+  currency = "USD",
+}) {
+  // Convert database pots to display format
+  const displayPots = potsData.map((pot) => ({
+    name: pot.name,
+    // Handle both old format (amount string) and new format (saved_amount number)
+    amount:
+      typeof pot.amount === "string"
+        ? pot.amount
+        : formatCurrency(pot.saved_amount || 0, currency),
+    color: pot.color || "bg-primary",
+    colorHex: pot.color && pot.color.startsWith("#") ? pot.color : null,
+  }));
+
   return (
     <div className="flex flex-col w-full text-foreground bg-background shadow-xl dark:bg-linear-45 dark:from-background dark:to-primary/20 border border-text/10 mt-5 p-6 gap-5 rounded-2xl">
       <SectionHeader title="Pots" linkHref="/pots" />
@@ -10,7 +28,7 @@ export default function PotsSection({ potsData, totalSaved }) {
       <div className="flex">
         <div className="flex w-full flex-col gap-5 md:flex-row justify-between">
           {/* Total Saved Card */}
-          <div className="flex md:w-xs gap-3 bg-accent/10  items-center p-5  rounded-2xl">
+          <div className="flex md:w-xs gap-3 bg-accent/10 items-center p-5 rounded-2xl">
             <BsPiggyBank className="text-5xl text-primary" />
             <div className="flex flex-col">
               <p>Total Saved</p>
@@ -22,8 +40,14 @@ export default function PotsSection({ potsData, totalSaved }) {
 
           {/* Pots Grid */}
           <div className="grid grid-cols-2 grid-rows-2">
-            {potsData.map((pot) => (
-              <PotItem key={pot.name} {...pot} />
+            {displayPots.map((pot) => (
+              <PotItem
+                key={pot.name}
+                name={pot.name}
+                amount={pot.amount}
+                color={pot.color}
+                colorHex={pot.colorHex}
+              />
             ))}
           </div>
         </div>

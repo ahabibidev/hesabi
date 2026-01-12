@@ -1,5 +1,4 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { getServerSession } from "next-auth";
+// app/dashboard/page.jsx
 import { redirect } from "next/navigation";
 import DashboardLayout from "./DashboardLayout";
 import StatCard from "@/components/dashboard/StatCard";
@@ -7,101 +6,71 @@ import PotsSection from "@/components/dashboard/PotsSection";
 import TransactionsSection from "@/components/dashboard/TransactionsSection";
 import BudgetSection from "@/components/dashboard/BudgetSection";
 import RecurringBillsSection from "@/components/dashboard/RecurringBillsSection";
+import { getDashboardData } from "@/lib/dashboard";
+import { formatCurrency } from "@/lib/constants";
 
 export default async function DashboardPage() {
-  // ======================
-  // Authentication Check
-  // ======================
-  const session = await getServerSession(authOptions);
-  if (!session) {
+  const data = await getDashboardData();
+
+  if (!data) {
     redirect("/login");
   }
 
-  // ======================
-  // Mock Data
-  // ======================
-  const transactions = [
-    {
-      id: 1,
-      sender: "Ahmad",
-      amount: 1000,
-      category: "Salary",
-      date: "19 Aug 2025",
-    },
-    {
-      id: 2,
-      sender: "Mohammad",
-      amount: 500,
-      category: "Groceries",
-      date: "20 Sep 2024",
-    },
-    {
-      id: 3,
-      sender: "ali",
-      amount: -240,
-      category: "Groceries",
-      date: "21 Sep 2024",
-    },
-    {
-      id: 4,
-      sender: "ali",
-      amount: -240,
-      category: "Groceries",
-      date: "21 Sep 2024",
-    },
-    {
-      id: 5,
-      sender: "ali",
-      amount: -240,
-      category: "Groceries",
-      date: "21 Sep 2024",
-    },
-  ];
+  const { user, summary } = data;
+  const currency = user?.currency || "USD";
 
-  const potsData = [
-    { name: "Savings", amount: "$130", color: "bg-cyan-900" },
-    { name: "Concert Ticket", amount: "$130", color: "bg-primary" },
-    { name: "Laptop", amount: "$130", color: "bg-orange-800" },
-    { name: "Mobile", amount: "$130", color: "bg-fuchsia-900" },
-  ];
-
-  const recurringBills = [
-    { name: "Paid Bills", amount: "$350.0", color: "bg-amber-700" },
-    { name: "Paid Bills", amount: "$350.0", color: "bg-blue-800" },
-    { name: "Paid Bills", amount: "$350.0", color: "bg-teal-700" },
-  ];
-
-  // ======================
-  // Main Render
-  // ======================
   return (
     <DashboardLayout>
       {/* Page Header */}
       <div className="flex w-full items-center mb-6">
-        <h1 className="relative  text-foreground text-4xl font-bold">
+        <h1 className="relative text-foreground text-4xl font-bold">
           Overview
         </h1>
       </div>
 
       {/* Stats Section */}
       <div className="flex flex-col md:flex-row w-full gap-5 mt-10">
-        <StatCard title="Current Balance" value="$4000.0" variant="default" />
-        <StatCard title="Income" value="$231.0" variant="gradient" />
-        <StatCard title="Expenses" value="$1400" variant="gradient" />
+        <StatCard
+          title="Current Balance"
+          value={formatCurrency(summary.currentBalance, currency)}
+          variant="default"
+        />
+        <StatCard
+          title="Income"
+          value={formatCurrency(summary.currentMonth.income, currency)}
+          variant="gradient"
+        />
+        <StatCard
+          title="Expenses"
+          value={formatCurrency(summary.currentMonth.expenses, currency)}
+          variant="gradient"
+        />
       </div>
 
       {/* Main Content Area */}
       <div className="h-full md:flex w-full gap-5">
         {/* Left Column */}
         <div className="flex w-full flex-col gap-5">
-          <PotsSection potsData={potsData} totalSaved="$930" />
-          <TransactionsSection transactions={transactions} maxItems={5} />
+          <PotsSection
+            potsData={summary.potsOverview}
+            totalSaved={formatCurrency(summary.totalSavings, currency)}
+            currency={currency}
+          />
+          <TransactionsSection
+            transactions={summary.recentTransactions}
+            currency={currency}
+            maxItems={5}
+          />
         </div>
 
         {/* Right Column */}
         <div className="flex flex-col w-full md:w-3/4 mt-5 gap-5">
-          <BudgetSection budgetCategories={potsData} />
-          <RecurringBillsSection bills={recurringBills} />
+          <BudgetSection budgets={summary.budgetOverview} currency={currency} />
+          <RecurringBillsSection
+            bills={summary.recurringBills}
+            billsSummary={summary.billsSummary}
+            currency={currency}
+          />
         </div>
       </div>
     </DashboardLayout>

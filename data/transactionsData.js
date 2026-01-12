@@ -9,7 +9,6 @@ export const allTransactions = [
     date: "19 Aug 2025",
     amount: 1000,
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmad",
-    description: "Monthly salary deposit",
   },
   {
     id: 2,

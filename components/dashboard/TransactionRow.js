@@ -1,15 +1,35 @@
-import Image from "next/image";
-import googleImg from "@/public/google.svg";
+// components/dashboard/TransactionRow.jsx
+import CategoryIcon from "./CategoryIcon";
+import { formatCurrency, formatDate } from "@/lib/constants";
 
-export default function TransactionRow({ transaction, showBorder = true }) {
-  const formatAmount = (amount) => {
-    const sign = amount >= 0 ? "+" : "-";
-    return `${sign}$${Math.abs(amount).toFixed(2)}`;
+export default function TransactionRow({
+  transaction,
+  currency = "USD",
+  showBorder = true,
+}) {
+  // Handle both old format (amount with sign) and new format (type field)
+  const amount =
+    transaction.type === "expense"
+      ? -Math.abs(transaction.amount)
+      : Math.abs(transaction.amount);
+
+  const formatAmount = (amt) => {
+    const sign = amt >= 0 ? "+" : "-";
+    return `${sign}${formatCurrency(Math.abs(amt), currency)}`;
   };
 
-  const getAmountColor = (amount) => {
-    return amount >= 0 ? "text-green-500" : "text-red-500";
+  const getAmountColor = (amt) => {
+    return amt >= 0 ? "text-green-500" : "text-red-500";
   };
+
+  // Use name field (new) or sender field (old)
+  const displayName = transaction.name || transaction.sender;
+
+  // Format date - handle both formats
+  const displayDate =
+    typeof transaction.date === "string" && transaction.date.includes("-")
+      ? formatDate(transaction.date)
+      : transaction.date;
 
   return (
     <div
@@ -17,25 +37,18 @@ export default function TransactionRow({ transaction, showBorder = true }) {
         showBorder ? "border-b border-text/30" : ""
       }`}
     >
-      <div className="flex gap-4  items-center">
-        <Image
-          className="rounded-full"
-          src={googleImg}
-          height={30}
-          width={30}
-          alt={`${transaction.sender} photo`}
+      <div className="flex gap-4 items-center">
+        <CategoryIcon
+          icon={transaction.category_icon || "default"}
+          className="text-white w-5 h-5"
         />
-        <p>{transaction.sender}</p>
+        <p>{displayName}</p>
       </div>
       <div>
-        <p
-          className={`font-bold text-right ${getAmountColor(
-            transaction.amount
-          )}`}
-        >
-          {formatAmount(transaction.amount)}
+        <p className={`font-bold text-right ${getAmountColor(amount)}`}>
+          {formatAmount(amount)}
         </p>
-        <p className="text-text text-right">{transaction.date}</p>
+        <p className="text-text text-right">{displayDate}</p>
       </div>
     </div>
   );

@@ -1,7 +1,12 @@
+// components/dashboard/TransactionsSection.jsx
 import SectionHeader from "./SectionHeader";
 import TransactionRow from "./TransactionRow";
 
-export default function TransactionsSection({ transactions, maxItems = 5 }) {
+export default function TransactionsSection({
+  transactions,
+  currency = "USD",
+  maxItems = 5,
+}) {
   const displayTransactions = transactions.slice(0, maxItems);
 
   return (
@@ -11,6 +16,7 @@ export default function TransactionsSection({ transactions, maxItems = 5 }) {
         <TransactionRow
           key={transaction.id}
           transaction={transaction}
+          currency={currency}
           showBorder={index !== displayTransactions.length - 1}
         />
       ))}
