@@ -20,6 +20,7 @@ export default function PotsSection({
     color: pot.color || "bg-primary",
     colorHex: pot.color && pot.color.startsWith("#") ? pot.color : null,
   }));
+  const hasNoPots = !potsData || potsData.length === 0;
 
   return (
     <div className="flex flex-col w-full text-foreground bg-background shadow-xl dark:bg-linear-45 dark:from-background dark:to-primary/20 border border-text/10 mt-5 p-6 gap-5 rounded-2xl">
@@ -39,17 +40,23 @@ export default function PotsSection({
           </div>
 
           {/* Pots Grid */}
-          <div className="grid grid-cols-2 grid-rows-2">
-            {displayPots.map((pot) => (
-              <PotItem
-                key={pot.name}
-                name={pot.name}
-                amount={pot.amount}
-                color={pot.color}
-                colorHex={pot.colorHex}
-              />
-            ))}
-          </div>
+          {hasNoPots ? (
+            <div className="flex items-center justify-center flex-1 text-text/50">
+              <p>No savings pots yet. Create one to start saving!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 grid-rows-2">
+              {displayPots.map((pot) => (
+                <PotItem
+                  key={pot.name}
+                  name={pot.name}
+                  amount={pot.amount}
+                  color={pot.color}
+                  colorHex={pot.colorHex}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

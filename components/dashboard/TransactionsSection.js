@@ -8,18 +8,26 @@ export default function TransactionsSection({
   maxItems = 5,
 }) {
   const displayTransactions = transactions.slice(0, maxItems);
+  const hasNoTransactions = !transactions || transactions.length === 0;
 
   return (
     <div className="flex w-full flex-col h-full bg-background shadow-xl dark:bg-linear-45 dark:from-background dark:to-primary/20 border border-text/10 p-6 gap-5 rounded-2xl">
       <SectionHeader title="Transactions" linkHref="/transactions" />
-      {displayTransactions.map((transaction, index) => (
-        <TransactionRow
-          key={transaction.id}
-          transaction={transaction}
-          currency={currency}
-          showBorder={index !== displayTransactions.length - 1}
-        />
-      ))}
+
+      {hasNoTransactions ? (
+        <div className="flex items-center h-full justify-center py-10  text-text/50">
+          <p>No transactions yet. Add your first transaction!</p>
+        </div>
+      ) : (
+        displayTransactions.map((transaction, index) => (
+          <TransactionRow
+            key={transaction.id}
+            transaction={transaction}
+            currency={currency}
+            showBorder={index !== displayTransactions.length - 1}
+          />
+        ))
+      )}
     </div>
   );
 }

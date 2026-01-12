@@ -31,34 +31,43 @@ export default function BudgetSection({
   // Check if using old format (PotItem style) or new format (BudgetItem style)
   const isOldFormat = budgetCategories && !budgets;
 
+  // Check if there are any budgets
+  const hasNoBudgets = !budgets || budgets.length === 0;
+
   return (
     <div className="flex flex-col text-foreground bg-background shadow-xl dark:bg-linear-45 dark:from-background dark:to-primary/20 border border-text/10 p-6 gap-5 rounded-2xl">
       <SectionHeader title="Budget" linkHref="/budget" />
 
-      <div className="flex flex-col md:flex-row items-center justify-between gap-2">
-        <div className="w-85.5">
-          <BudgetChart
-            data={chartData}
-            totalSpent={totalSpent}
-            totalBudget={totalBudget}
-            currency={currency}
-          />
+      {hasNoBudgets ? (
+        <div className="flex items-center justify-center py-10 text-text/50">
+          <p>No budgets set. Create a budget to track your spending!</p>
         </div>
-
-        {/* Budget Categories */}
-        <div className="md:flex md:flex-col grid grid-cols-2 grid-rows-2 gap-2 justify-center">
-          {data.map((item) => (
-            <BudgetItem
-              key={item.id || item.name}
-              name={item.name}
-              spent={item.spent || item.value || 0}
-              max={item.max_amount || item.max || 0}
-              color={item.color}
+      ) : (
+        <div className="flex flex-col md:flex-row items-center justify-between gap-2">
+          <div className="w-85.5">
+            <BudgetChart
+              data={chartData}
+              totalSpent={totalSpent}
+              totalBudget={totalBudget}
               currency={currency}
             />
-          ))}
+          </div>
+
+          {/* Budget Categories */}
+          <div className="md:flex md:flex-col grid grid-cols-2 grid-rows-2 gap-2 justify-center">
+            {data.map((item) => (
+              <BudgetItem
+                key={item.id || item.name}
+                name={item.name}
+                spent={item.spent || item.value || 0}
+                max={item.max_amount || item.max || 0}
+                color={item.color}
+                currency={currency}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
