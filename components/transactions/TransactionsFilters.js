@@ -1,6 +1,7 @@
+// components/transactions/TransactionsFilters.jsx
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { SlMagnifier } from "react-icons/sl";
 import { FiX, FiFilter, FiGrid } from "react-icons/fi";
 import MobileFilterModal from "./MobileFilterModal";
@@ -14,6 +15,7 @@ export default function TransactionsFilters({
   setCategoryFilter,
   typeFilter,
   setTypeFilter,
+  categories = [],
 }) {
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [showMobileCategory, setShowMobileCategory] = useState(false);
@@ -27,15 +29,13 @@ export default function TransactionsFilters({
     { value: "expense-first", label: "Expense First" },
   ];
 
-  const categories = [
-    "Salary",
-    "Groceries",
-    "Dining",
-    "Shopping",
-    "Entertainment",
-    "Freelance",
-    "Transportation",
-  ];
+  // Get unique categories from the database categories
+  const categoryOptions = useMemo(() => {
+    const uniqueCategories = categories
+      .filter((c) => c.is_default || c.user_id)
+      .map((c) => c.name);
+    return [...new Set(uniqueCategories)].sort();
+  }, [categories]);
 
   return (
     <>
@@ -132,7 +132,7 @@ export default function TransactionsFilters({
               className="rounded-xl border border-text/20 bg-background dark:bg-gray-900 px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent min-w-[180px] cursor-pointer transition-all duration-200"
             >
               <option value="all">All Categories</option>
-              {categories.map((category) => (
+              {categoryOptions.map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
@@ -200,7 +200,7 @@ export default function TransactionsFilters({
           >
             All Categories
           </button>
-          {categories.map((category) => (
+          {categoryOptions.map((category) => (
             <button
               key={category}
               onClick={() => {

@@ -1,3 +1,4 @@
+// components/transactions/ActiveFilters.jsx
 import { FiX } from "react-icons/fi";
 
 export default function ActiveFilters({
@@ -28,7 +29,10 @@ export default function ActiveFilters({
   }
 
   if (typeFilter !== "all") {
-    activeFilters.push({ label: `Type: ${typeFilter}`, onClear: onClearType });
+    activeFilters.push({
+      label: `Type: ${typeFilter}`,
+      onClear: onClearType,
+    });
   }
 
   if (sortBy !== "latest") {
@@ -38,6 +42,10 @@ export default function ActiveFilters({
       "amount-low": "Amount: Low to High",
       "income-first": "Income First",
       "expense-first": "Expense First",
+      highest: "Highest Amount",
+      lowest: "Lowest Amount",
+      "a-z": "A-Z",
+      "z-a": "Z-A",
     };
     activeFilters.push({
       label: `Sort: ${sortLabels[sortBy] || sortBy}`,

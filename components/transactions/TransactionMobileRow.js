@@ -1,27 +1,54 @@
+// components/transactions/TransactionMobileRow.jsx
 "use client";
 
 import { memo, useState } from "react";
-import Image from "next/image";
 import { FiMoreVertical } from "react-icons/fi";
-import { formatAmount, getAmountColor } from "@/utils/transactionUtils";
+import CategoryIcon from "../dashboard/CategoryIcon";
+import { formatCurrency, formatDate } from "@/lib/constants";
+import { BiDownArrowAlt, BiUpArrowAlt } from "react-icons/bi";
 
-function TransactionMobileRow({ transaction, onEdit, onHide }) {
+function TransactionMobileRow({
+  transaction,
+  currency = "USD",
+  onEdit,
+  onHide,
+  onDelete,
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleHide = () => {
+    setMenuOpen(false);
     onHide(transaction.id);
   };
 
   const handleEdit = () => {
+    setMenuOpen(false);
     onEdit(transaction);
   };
 
   const handleDelete = () => {
-    if (confirm("Are you sure you want to delete this transaction?")) {
-      alert(`Deleted transaction #${transaction.id}`);
-    }
     setMenuOpen(false);
+    onDelete(transaction.id);
   };
+
+  // Format amount
+  const formatAmount = (amount) => {
+    const sign = amount >= 0 ? "+" : "-";
+    return `${sign}${formatCurrency(Math.abs(amount), currency)}`;
+  };
+
+  const getAmountColor = (amount) => {
+    return amount >= 0 ? "text-green-500" : "text-red-500";
+  };
+
+  // Format date
+  const displayDate =
+    typeof transaction.date === "string" && transaction.date.includes("-")
+      ? formatDate(transaction.date)
+      : transaction.date;
+
+  // Category color
+  const categoryColor = transaction.category_color || "#6B7280";
 
   return (
     <>
@@ -29,19 +56,23 @@ function TransactionMobileRow({ transaction, onEdit, onHide }) {
       <td className="py-3 px-2 md:hidden">
         <div className="flex items-center gap-3">
           <div className="relative shrink-0">
-            <Image
-              src={transaction.avatar}
-              className="h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800"
-              alt={transaction.name}
-              width={32}
-              height={32}
-              unoptimized
-            />
-            <span
-              className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white dark:border-gray-800 ${
-                transaction.type === "Income" ? "bg-green-500" : "bg-red-500"
-              }`}
-            />
+            {/* Category icon with color background */}
+            <div
+              className="h-8 w-8 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-gray-800"
+              style={{ backgroundColor: categoryColor }}
+            >
+              <CategoryIcon
+                icon={transaction.category_icon || "default"}
+                className="text-white w-4 h-4"
+              />
+            </div>
+            <span className={`absolute -bottom-1 right-0 h-4 w-4 `}>
+              {transaction.type === "Income" ? (
+                <BiDownArrowAlt className="text-xl bg-[#112C2E] text-[#0BD369] rounded-full" />
+              ) : (
+                <BiUpArrowAlt className="text-xl bg-[#331A28] text-[#CA2728] rounded-full" />
+              )}
+            </span>
           </div>
           <div className="min-w-0">
             <div className="font-medium text-foreground text-sm truncate">
@@ -63,7 +94,7 @@ function TransactionMobileRow({ transaction, onEdit, onHide }) {
         >
           {formatAmount(transaction.amount)}
         </div>
-        <div className="text-xs text-text/60 mt-0.5">{transaction.date}</div>
+        <div className="text-xs text-text/60 mt-0.5">{displayDate}</div>
       </td>
 
       {/* Actions */}

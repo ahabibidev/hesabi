@@ -1,12 +1,16 @@
+// components/transactions/TransactionsTableView.jsx
 import TransactionDesktopRow from "./TransactionDesktopRow";
 import TransactionMobileRow from "./TransactionMobileRow";
 
 export default function TransactionsTableView({
   transactions,
   searchTerm,
+  currency = "USD",
   onClearFilters,
   onEdit,
   onHide,
+  onDelete,
+  isLoading = false,
 }) {
   if (transactions.length === 0) {
     return (
@@ -31,7 +35,11 @@ export default function TransactionsTableView({
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-text/10">
+    <div
+      className={`overflow-x-auto rounded-xl border border-text/10 ${
+        isLoading ? "opacity-50 pointer-events-none" : ""
+      }`}
+    >
       <table className="w-full">
         {/* Desktop Headers */}
         <thead className="hidden sm:table-header-group bg-gray-50 dark:bg-gray-900/50 border-b border-text/10">
@@ -77,13 +85,17 @@ export default function TransactionsTableView({
             <tr key={tx.id}>
               <TransactionDesktopRow
                 transaction={tx}
+                currency={currency}
                 onEdit={onEdit}
                 onHide={onHide}
+                onDelete={onDelete}
               />
               <TransactionMobileRow
                 transaction={tx}
+                currency={currency}
                 onEdit={onEdit}
                 onHide={onHide}
+                onDelete={onDelete}
               />
             </tr>
           ))}

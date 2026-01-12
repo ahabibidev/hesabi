@@ -1,28 +1,48 @@
+// components/transactions/TransactionDesktopRow.jsx
 "use client";
-
+import { BiDownArrowAlt } from "react-icons/bi";
+import { BiUpArrowAlt } from "react-icons/bi";
 import { memo } from "react";
-import Image from "next/image";
-import {
-  formatAmount,
-  getAmountColor,
-  getCategoryColor,
-  getTypeBadgeClass,
-} from "@/utils/transactionUtils";
+import CategoryIcon from "../dashboard/CategoryIcon";
+import { formatCurrency, formatDate } from "@/lib/constants";
 
-function TransactionDesktopRow({ transaction, onEdit, onHide }) {
+function TransactionDesktopRow({
+  transaction,
+  currency = "USD",
+  onEdit,
+  onHide,
+  onDelete,
+}) {
   const handleEdit = () => {
     onEdit(transaction);
   };
 
   const handleDelete = () => {
-    if (confirm("Are you sure you want to delete this transaction?")) {
-      alert(`Deleted transaction #${transaction.id}`);
-    }
+    onDelete(transaction.id);
   };
 
   const handleHide = () => {
     onHide(transaction.id);
   };
+
+  // Format amount
+  const formatAmount = (amount) => {
+    const sign = amount >= 0 ? "+" : "-";
+    return `${sign}${formatCurrency(Math.abs(amount), currency)}`;
+  };
+
+  const getAmountColor = (amount) => {
+    return amount >= 0 ? "text-green-500" : "text-red-500";
+  };
+
+  // Format date
+  const displayDate =
+    typeof transaction.date === "string" && transaction.date.includes("-")
+      ? formatDate(transaction.date)
+      : transaction.date;
+
+  // Category color for the badge
+  const categoryColor = transaction.category_color || "#6B7280";
 
   return (
     <>
@@ -30,19 +50,23 @@ function TransactionDesktopRow({ transaction, onEdit, onHide }) {
       <td className="hidden sm:table-cell py-4 px-6">
         <div className="flex items-center gap-3">
           <div className="relative shrink-0">
-            <Image
-              src={transaction.avatar}
-              className="h-10 w-10 rounded-full ring-2 ring-white dark:ring-gray-800"
-              alt={transaction.name}
-              width={40}
-              height={40}
-              unoptimized
-            />
-            <span
-              className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white dark:border-gray-800 ${
-                transaction.type === "Income" ? "bg-green-500" : "bg-red-500"
-              }`}
-            />
+            {/* Category icon with color background */}
+            <div
+              className="h-10 w-10 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-gray-800"
+              style={{ backgroundColor: categoryColor }}
+            >
+              <CategoryIcon
+                icon={transaction.category_icon || "default"}
+                className="text-white w-5 h-5"
+              />
+            </div>
+            <span className={`absolute -bottom-1 right-0 h-4 w-4 `}>
+              {transaction.type === "Income" ? (
+                <BiDownArrowAlt className="text-xl bg-[#112C2E] text-[#0BD369] rounded-full" />
+              ) : (
+                <BiUpArrowAlt className="text-xl bg-[#331A28] text-[#CA2728] rounded-full" />
+              )}
+            </span>
           </div>
           <div className="min-w-0">
             <span className="font-medium text-foreground block truncate">
@@ -58,9 +82,8 @@ function TransactionDesktopRow({ transaction, onEdit, onHide }) {
       {/* Category - Hidden on mobile */}
       <td className="hidden sm:table-cell py-4 px-6">
         <span
-          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getCategoryColor(
-            transaction.category
-          )}`}
+          className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-white"
+          style={{ backgroundColor: categoryColor }}
         >
           {transaction.category}
         </span>
@@ -69,9 +92,11 @@ function TransactionDesktopRow({ transaction, onEdit, onHide }) {
       {/* Type - Hidden on mobile */}
       <td className="hidden sm:table-cell py-4 px-6">
         <span
-          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getTypeBadgeClass(
-            transaction.type
-          )}`}
+          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+            transaction.type === "Income"
+              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+              : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+          }`}
         >
           {transaction.type}
         </span>
@@ -80,10 +105,7 @@ function TransactionDesktopRow({ transaction, onEdit, onHide }) {
       {/* Date - Hidden on mobile */}
       <td className="hidden sm:table-cell py-4 px-6">
         <div className="flex flex-col">
-          <span className="text-foreground font-medium">
-            {transaction.date}
-          </span>
-          <span className="text-sm text-text/70">3:45 PM</span>
+          <span className="text-foreground font-medium">{displayDate}</span>
         </div>
       </td>
 

@@ -1,12 +1,25 @@
+// app/transactions/page.jsx
+import { redirect } from "next/navigation";
 import DashboardLayout from "../dashboard/DashboardLayout";
 import TransactionsClientWrapper from "@/components/transactions/TransactionsClientWrapper";
-import { allTransactions } from "@/data/transactionsData";
+import { getTransactionsData } from "@/lib/transactions";
 
-// This is a SERVER component
-export default function TransactionsPage() {
+export default async function TransactionsPage() {
+  const data = await getTransactionsData();
+
+  if (!data) {
+    redirect("/login");
+  }
+
+  const { user, transactions, categories } = data;
+
   return (
     <DashboardLayout>
-      <TransactionsClientWrapper initialTransactions={allTransactions} />
+      <TransactionsClientWrapper
+        initialTransactions={transactions}
+        categories={categories}
+        currency={user?.currency || "USD"}
+      />
     </DashboardLayout>
   );
 }

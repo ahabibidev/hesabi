@@ -15,49 +15,88 @@ export default function AddTransactionModal({
     date: new Date().toISOString().split("T")[0],
     amount: "",
     type: "expense",
+    description: "",
+    recurring: false,
+    recurringInterval: "",
   });
 
+  const [errors, setErrors] = useState({});
+
+  // Categories with types for filtering
   const categories = [
-    "Food & Dining",
-    "Shopping",
-    "Transportation",
-    "Entertainment",
-    "Bills & Utilities",
-    "Healthcare",
-    "Education",
-    "Income",
-    "Transfer",
-    "Other",
+    { name: "Food & Dining", type: "expense" },
+    { name: "Shopping", type: "expense" },
+    { name: "Transportation", type: "expense" },
+    { name: "Entertainment", type: "expense" },
+    { name: "Bills & Utilities", type: "expense" },
+    { name: "Healthcare", type: "expense" },
+    { name: "Education", type: "expense" },
+    { name: "Income", type: "income" },
+    { name: "Transfer", type: "both" },
+    { name: "Other", type: "both" },
   ];
+
+  // Filter categories based on transaction type
+  const filteredCategories = categories.filter((category) => {
+    const type = formData.type === "income" ? "income" : "expense";
+    return category.type === type || category.type === "both";
+  });
 
   // Reset form when modal opens/closes or editingTransaction changes
   useEffect(() => {
-    if (editingTransaction) {
-      // Convert the transaction data to match form structure
-      const date = editingTransaction.date.includes("/")
-        ? convertToDateInput(editingTransaction.date)
-        : new Date(editingTransaction.date).toISOString().split("T")[0];
+    if (isOpen) {
+      if (editingTransaction) {
+        // Convert the transaction data to match form structure
+        const date = editingTransaction.date.includes("/")
+          ? convertToDateInput(editingTransaction.date)
+          : new Date(editingTransaction.date).toISOString().split("T")[0];
 
-      setFormData({
-        name: editingTransaction.name || "",
-        category: editingTransaction.category || "",
-        date: date,
-        amount: editingTransaction.amount?.toString() || "",
-        type:
-          editingTransaction.type?.toLowerCase() === "income"
-            ? "income"
-            : "expense",
-      });
-    } else {
-      setFormData({
-        name: "",
-        category: "",
-        date: new Date().toISOString().split("T")[0],
-        amount: "",
-        type: "expense",
-      });
+        setFormData({
+          name: editingTransaction.name || "",
+          category: editingTransaction.category || "",
+          date: date,
+          amount: Math.abs(editingTransaction.amount)?.toString() || "",
+          type:
+            editingTransaction.type?.toLowerCase() === "income"
+              ? "income"
+              : "expense",
+          description: editingTransaction.description || "",
+          recurring: editingTransaction.recurring || false,
+          recurringInterval: editingTransaction.recurringInterval || "",
+        });
+      } else {
+        setFormData({
+          name: "",
+          category: "",
+          date: new Date().toISOString().split("T")[0],
+          amount: "",
+          type: "expense",
+          description: "",
+          recurring: false,
+          recurringInterval: "",
+        });
+      }
+      setErrors({});
     }
-  }, [editingTransaction, isOpen]);
+  }, [isOpen, editingTransaction]);
+
+  // Update category when type changes
+  useEffect(() => {
+    if (formData.category) {
+      const currentCategory = categories.find(
+        (c) => c.name === formData.category
+      );
+      const type = formData.type === "income" ? "income" : "expense";
+
+      if (
+        currentCategory &&
+        currentCategory.type !== type &&
+        currentCategory.type !== "both"
+      ) {
+        setFormData((prev) => ({ ...prev, category: "" }));
+      }
+    }
+  }, [formData.type]);
 
   // Helper function to convert date string to YYYY-MM-DD format
   const convertToDateInput = (dateStr) => {
@@ -68,18 +107,67 @@ export default function AddTransactionModal({
     return new Date().toISOString().split("T")[0];
   };
 
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+
+    // Clear error when field is edited
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+    }
+
+    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+      newErrors.amount = "Please enter a valid amount";
+    }
+
+    if (!formData.category) {
+      newErrors.category = "Please select a category";
+    }
+
+    if (!formData.date) {
+      newErrors.date = "Please select a date";
+    }
+
+    if (formData.recurring && !formData.recurringInterval) {
+      newErrors.recurringInterval = "Please select a recurring interval";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.category || !formData.amount) {
-      alert("Please fill in all required fields");
+
+    if (!validateForm()) {
       return;
+    }
+
+    // Format date properly
+    let formattedDate;
+    if (formData.date.includes("-")) {
+      const [year, month, day] = formData.date.split("-");
+      formattedDate = `${month}/${day}/${year}`;
+    } else {
+      formattedDate = new Date(formData.date).toLocaleDateString();
     }
 
     const transactionData = {
       ...formData,
       id: editingTransaction ? editingTransaction.id : Date.now(),
       amount: parseFloat(formData.amount),
-      date: new Date(formData.date).toISOString(),
+      date: formattedDate,
     };
 
     if (editingTransaction) {
@@ -92,14 +180,6 @@ export default function AddTransactionModal({
 
   const handleClose = () => {
     onClose();
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
   };
 
   if (!isOpen) return null;
@@ -162,9 +242,29 @@ export default function AddTransactionModal({
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="e.g., Grocery shopping, Salary"
-                  className="w-full px-4 py-3 rounded-lg border border-text/20 bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                  className={`w-full px-4 py-3 rounded-lg border ${
+                    errors.name ? "border-red-500" : "border-text/20"
+                  } bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all`}
                   required
                   autoFocus
+                />
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+                )}
+              </div>
+
+              {/* Description Field */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Add a note (optional)"
+                  rows={2}
+                  className="w-full px-4 py-3 rounded-lg border border-text/20 bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all resize-none"
                 />
               </div>
 
@@ -178,19 +278,21 @@ export default function AddTransactionModal({
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-text/20 bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all appearance-none"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.category ? "border-red-500" : "border-text/20"
+                    } bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all appearance-none`}
                     required
                   >
                     <option className="bg-background text-foreground" value="">
                       Select a category
                     </option>
-                    {categories.map((cat) => (
+                    {filteredCategories.map((cat) => (
                       <option
-                        key={cat}
-                        value={cat}
+                        key={cat.name}
+                        value={cat.name}
                         className="bg-background text-foreground"
                       >
-                        {cat}
+                        {cat.name}
                       </option>
                     ))}
                   </select>
@@ -210,6 +312,9 @@ export default function AddTransactionModal({
                     </svg>
                   </div>
                 </div>
+                {errors.category && (
+                  <p className="mt-1 text-sm text-red-500">{errors.category}</p>
+                )}
               </div>
 
               {/* Type Field */}
@@ -260,10 +365,15 @@ export default function AddTransactionModal({
                       name="date"
                       value={formData.date}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-text/20 bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                      className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                        errors.date ? "border-red-500" : "border-text/20"
+                      } bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all`}
                       required
                     />
                   </div>
+                  {errors.date && (
+                    <p className="mt-1 text-sm text-red-500">{errors.date}</p>
+                  )}
                 </div>
 
                 <div>
@@ -282,12 +392,105 @@ export default function AddTransactionModal({
                       placeholder="0.00"
                       min="0"
                       step="0.01"
-                      className="w-full pl-8 pr-4 py-3 rounded-lg border border-text/20 bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                      className={`w-full pl-8 pr-4 py-3 rounded-lg border ${
+                        errors.amount ? "border-red-500" : "border-text/20"
+                      } bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all`}
                       required
                     />
                   </div>
+                  {errors.amount && (
+                    <p className="mt-1 text-sm text-red-500">{errors.amount}</p>
+                  )}
                 </div>
               </div>
+
+              {/* Recurring Transaction */}
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="recurring"
+                    checked={formData.recurring}
+                    onChange={handleChange}
+                    className="w-5 h-5 rounded border-text/20 text-primary focus:ring-primary/40"
+                  />
+                  <span className="text-sm font-medium text-foreground">
+                    This is a recurring transaction
+                  </span>
+                </label>
+              </div>
+
+              {/* Recurring Interval (shown only when recurring is checked) */}
+              {formData.recurring && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Repeat Every <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="recurringInterval"
+                      value={formData.recurringInterval}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-3 rounded-lg border ${
+                        errors.recurringInterval
+                          ? "border-red-500"
+                          : "border-text/20"
+                      } bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all appearance-none`}
+                    >
+                      <option
+                        className="bg-background text-foreground"
+                        value=""
+                      >
+                        Select interval
+                      </option>
+                      <option
+                        className="bg-background text-foreground"
+                        value="daily"
+                      >
+                        Daily
+                      </option>
+                      <option
+                        className="bg-background text-foreground"
+                        value="weekly"
+                      >
+                        Weekly
+                      </option>
+                      <option
+                        className="bg-background text-foreground"
+                        value="monthly"
+                      >
+                        Monthly
+                      </option>
+                      <option
+                        className="bg-background text-foreground"
+                        value="yearly"
+                      >
+                        Yearly
+                      </option>
+                    </select>
+                    <div className="absolute right-3 top-3 pointer-events-none">
+                      <svg
+                        className="w-5 h-5 text-text/50"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  {errors.recurringInterval && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.recurringInterval}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Footer Buttons */}
