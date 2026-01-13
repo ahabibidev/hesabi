@@ -1,60 +1,131 @@
-// Utility functions for recurring bills
-export const formatAmount = (amount) => {
-  return `$${Math.abs(amount).toFixed(2)}`;
-};
+// utils/recurringBillsUtils.js
 
-export const formatDueDate = (dateString) => {
+// Format currency
+export function formatAmount(amount) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(Math.abs(amount));
+}
+
+// Get ordinal suffix for numbers (1st, 2nd, 3rd, etc.)
+function getOrdinal(n) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+// Get day name from date
+function getDayName(date) {
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  return days[date.getDay()];
+}
+
+// Get month abbreviation from date
+function getMonthAbbr(date) {
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  return months[date.getMonth()];
+}
+
+// Format due date based on recurring interval
+export function formatDueDate(dateString, recurringInterval) {
+  if (!dateString) return "No date";
+
   const date = new Date(dateString);
   const day = date.getDate();
 
-  // Get ordinal suffix
-  let suffix = "th";
-  if (day === 1 || day === 21 || day === 31) suffix = "st";
-  else if (day === 2 || day === 22) suffix = "nd";
-  else if (day === 3 || day === 23) suffix = "rd";
+  switch (recurringInterval) {
+    case "daily":
+      return "Daily";
 
-  return `Monthly ${day}${suffix}`;
-};
+    case "weekly":
+      const dayName = getDayName(date);
+      return `Weekly - ${dayName}`;
 
-export const filterBills = (bills, searchTerm) => {
-  if (searchTerm.trim() === "") return bills;
+    case "monthly":
+      return `Monthly - ${getOrdinal(day)}`;
 
-  const term = searchTerm.toLowerCase();
-  return bills.filter(
-    (bill) =>
-      bill.name.toLowerCase().includes(term) ||
-      bill.description.toLowerCase().includes(term) ||
-      bill.category.toLowerCase().includes(term)
-  );
-};
+    case "yearly":
+      const monthAbbr = getMonthAbbr(date);
+      return `Yearly - ${monthAbbr} ${getOrdinal(day)}`;
 
-export const sortBills = (bills, sortBy) => {
+    default:
+      // Fallback to monthly if no interval specified
+      return `Monthly - ${getOrdinal(day)}`;
+  }
+}
+
+// Filter bills by search term
+export function filterBills(bills, searchTerm) {
+  if (!searchTerm || searchTerm.trim() === "") {
+    return bills;
+  }
+
+  const search = searchTerm.toLowerCase().trim();
+
+  return bills.filter((bill) => {
+    const name = bill.name?.toLowerCase() || "";
+    const description = bill.description?.toLowerCase() || "";
+    const category = bill.category?.toLowerCase() || "";
+
+    return (
+      name.includes(search) ||
+      description.includes(search) ||
+      category.includes(search)
+    );
+  });
+}
+
+// Sort bills
+export function sortBills(bills, sortBy) {
   const sorted = [...bills];
 
   switch (sortBy) {
     case "name":
-      sorted.sort((a, b) => a.name.localeCompare(b.name));
-      break;
+      return sorted.sort((a, b) => a.name.localeCompare(b.name));
     case "date":
-      sorted.sort((a, b) => {
+      return sorted.sort((a, b) => {
         const dateA = new Date(a.date);
         const dateB = new Date(b.date);
-        return dateA.getTime() - dateB.getTime();
+        // Sort by day of month for recurring bills
+        return dateA.getDate() - dateB.getDate();
       });
-      break;
     case "amount":
-      sorted.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
-      break;
+      return sorted.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
     default:
-      break;
+      return sorted;
   }
+}
 
-  return sorted;
-};
+// Calculate total amount
+export function calculateTotalAmount(bills) {
+  return bills.reduce((total, bill) => total + Math.abs(bill.amount), 0);
+}
 
-export const calculateSummaryMetrics = (bills) => {
-  const currentDate = new Date();
-  const currentDay = currentDate.getDate();
+// Calculate summary metrics
+export function calculateSummaryMetrics(bills) {
+  const today = new Date();
 
   let paidBillsCount = 0;
   let paidBillsAmount = 0;
@@ -65,24 +136,29 @@ export const calculateSummaryMetrics = (bills) => {
 
   bills.forEach((bill) => {
     const billDate = new Date(bill.date);
-    const billDay = billDate.getDate();
-    const billAmount = Math.abs(bill.amount);
+    const amount = Math.abs(bill.amount);
+    const interval = bill.recurring_interval || "monthly";
 
-    // Check if bill is paid (date has passed)
-    if (billDay < currentDay) {
+    // Calculate next due date based on interval
+    let nextDueDate = getNextDueDate(billDate, interval, today);
+
+    // Calculate days until due
+    const daysUntilDue = Math.ceil(
+      (nextDueDate - today) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysUntilDue < 0) {
+      // Past due or paid
       paidBillsCount++;
-      paidBillsAmount += billAmount;
+      paidBillsAmount += amount;
+    } else if (daysUntilDue <= 7) {
+      // Due within 7 days
+      dueSoonBillsCount++;
+      dueSoonBillsAmount += amount;
     } else {
-      // Bill is upcoming
+      // Further out
       upcomingBillsCount++;
-      upcomingBillsAmount += billAmount;
-
-      // Check if bill is due soon (within 5 days)
-      const daysUntilDue = billDay - currentDay;
-      if (daysUntilDue >= 0 && daysUntilDue <= 5) {
-        dueSoonBillsCount++;
-        dueSoonBillsAmount += billAmount;
-      }
+      upcomingBillsAmount += amount;
     }
   });
 
@@ -94,8 +170,62 @@ export const calculateSummaryMetrics = (bills) => {
     dueSoonBillsCount,
     dueSoonBillsAmount,
   };
-};
+}
 
-export const calculateTotalAmount = (bills) => {
-  return bills.reduce((sum, bill) => sum + Math.abs(bill.amount), 0);
-};
+// Helper function to get next due date based on interval
+function getNextDueDate(originalDate, interval, today) {
+  const nextDate = new Date(originalDate);
+
+  switch (interval) {
+    case "daily":
+      // Next occurrence is today or tomorrow
+      if (nextDate <= today) {
+        nextDate.setFullYear(today.getFullYear());
+        nextDate.setMonth(today.getMonth());
+        nextDate.setDate(today.getDate());
+      }
+      break;
+
+    case "weekly":
+      // Find the next occurrence of the same day of week
+      const targetDay = originalDate.getDay();
+      const todayDay = today.getDay();
+      let daysToAdd = targetDay - todayDay;
+      if (daysToAdd <= 0) {
+        daysToAdd += 7;
+      }
+      nextDate.setFullYear(today.getFullYear());
+      nextDate.setMonth(today.getMonth());
+      nextDate.setDate(today.getDate() + daysToAdd);
+      break;
+
+    case "monthly":
+      // Set to this month's occurrence
+      nextDate.setFullYear(today.getFullYear());
+      nextDate.setMonth(today.getMonth());
+      // If already passed this month, use next month
+      if (nextDate < today) {
+        nextDate.setMonth(nextDate.getMonth() + 1);
+      }
+      break;
+
+    case "yearly":
+      // Set to this year's occurrence
+      nextDate.setFullYear(today.getFullYear());
+      // If already passed this year, use next year
+      if (nextDate < today) {
+        nextDate.setFullYear(nextDate.getFullYear() + 1);
+      }
+      break;
+
+    default:
+      // Default to monthly behavior
+      nextDate.setFullYear(today.getFullYear());
+      nextDate.setMonth(today.getMonth());
+      if (nextDate < today) {
+        nextDate.setMonth(nextDate.getMonth() + 1);
+      }
+  }
+
+  return nextDate;
+}

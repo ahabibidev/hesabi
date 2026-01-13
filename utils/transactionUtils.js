@@ -43,13 +43,20 @@ export const filterTransactions = (
 
   if (searchTerm) {
     const term = searchTerm.toLowerCase();
-    filtered = filtered.filter(
-      (tx) =>
-        tx.name.toLowerCase().includes(term) ||
-        tx.category.toLowerCase().includes(term) ||
-        tx.description.toLowerCase().includes(term) ||
-        Math.abs(tx.amount).toString().includes(searchTerm)
-    );
+    filtered = filtered.filter((tx) => {
+      // Use fallback empty strings to prevent 'toLowerCase' on null/undefined
+      const name = (tx.name || "").toLowerCase();
+      const category = (tx.category || "").toLowerCase();
+      const description = (tx.description || "").toLowerCase();
+      const amount = Math.abs(tx.amount || 0).toString();
+
+      return (
+        name.includes(term) ||
+        category.includes(term) ||
+        description.includes(term) ||
+        amount.includes(searchTerm)
+      );
+    });
   }
 
   if (categoryFilter !== "all") {
