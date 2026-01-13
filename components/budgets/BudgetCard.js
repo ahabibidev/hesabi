@@ -1,3 +1,4 @@
+// components/budgets/BudgetCard.jsx
 "use client";
 
 import { memo } from "react";
@@ -6,11 +7,13 @@ import BudgetProgressBar from "./BudgetProgressBar";
 import BudgetSpendRemaining from "./BudgetSpendRemaining";
 import LatestSpendingSection from "./LatestSpendingSection";
 import { getProgressBarColor } from "@/utils/budgetsUtils";
+import { formatCurrency } from "@/lib/constants";
 
 function BudgetCard({
   budget,
   spend,
   transactions,
+  currency = "USD",
   openDropdownId,
   onDropdownToggle,
   onEdit,
@@ -19,11 +22,17 @@ function BudgetCard({
   const remaining = budget.max - spend;
   const progressBarColor = getProgressBarColor(budget.color);
 
+  // Get the category name for filtering
+  const categoryName = budget.category_name || budget.name;
+
   return (
     <div className="flex flex-col md:h-180 gap-5 bg-background shadow-xl dark:bg-linear-45 dark:from-background dark:to-primary/20 border border-text/10 p-5 md:p-10 rounded-2xl">
       <div className="flex items-center w-full justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-4 h-4 rounded-full ${budget.color}`}></div>
+          <div
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: budget.color }}
+          ></div>
           <h2 className="text-2xl font-semibold">{budget.name}</h2>
         </div>
 
@@ -36,7 +45,9 @@ function BudgetCard({
         />
       </div>
 
-      <p className="text-text">Maximum Of ${budget.max.toFixed(2)}</p>
+      <p className="text-text">
+        Maximum Of {formatCurrency(budget.max, currency)}
+      </p>
 
       <BudgetProgressBar
         spend={spend}
@@ -48,11 +59,14 @@ function BudgetCard({
         spend={spend}
         remaining={remaining}
         budgetColor={budget.color}
+        currency={currency}
       />
 
       <LatestSpendingSection
         budgetName={budget.name}
+        categoryName={categoryName}
         transactions={transactions}
+        currency={currency}
       />
     </div>
   );

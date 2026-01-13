@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Header from "../header/Header";
 import TransactionsFilters from "./TransactionsFilters";
 import TransactionsTableView from "./TransactionsTableView";
@@ -17,9 +17,14 @@ export default function TransactionsClientWrapper({
   currency = "USD",
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get initial category from URL
+  const initialCategory = searchParams.get("category") || "all";
+
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("latest");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState(initialCategory);
   const [typeFilter, setTypeFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -28,6 +33,14 @@ export default function TransactionsClientWrapper({
   const [isLoading, setIsLoading] = useState(false);
 
   const itemsPerPage = 7;
+
+  // Update category filter when URL changes
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get("category");
+    if (categoryFromUrl) {
+      setCategoryFilter(categoryFromUrl);
+    }
+  }, [searchParams]);
 
   // Update transactions when initialTransactions changes
   useEffect(() => {
@@ -55,6 +68,28 @@ export default function TransactionsClientWrapper({
     setCurrentPage(1);
   }, [searchTerm, categoryFilter, typeFilter, sortBy]);
 
+  // Update URL when category filter changes
+  const handleCategoryFilterChange = useCallback(
+    (newCategory) => {
+      setCategoryFilter(newCategory);
+
+      // Update URL
+      const params = new URLSearchParams(searchParams.toString());
+      if (newCategory && newCategory !== "all") {
+        params.set("category", newCategory);
+      } else {
+        params.delete("category");
+      }
+
+      const newUrl = params.toString()
+        ? `/transactions?${params.toString()}`
+        : "/transactions";
+
+      router.push(newUrl, { scroll: false });
+    },
+    [router, searchParams]
+  );
+
   const handlePageChange = useCallback(
     (page) => {
       if (page >= 1 && page <= totalPages) {
@@ -70,7 +105,14 @@ export default function TransactionsClientWrapper({
     setCategoryFilter("all");
     setTypeFilter("all");
     setSortBy("latest");
-  }, []);
+
+    // Clear URL params
+    router.push("/transactions", { scroll: false });
+  }, [router]);
+
+  const handleClearCategory = useCallback(() => {
+    handleCategoryFilterChange("all");
+  }, [handleCategoryFilterChange]);
 
   const handleAddTransaction = useCallback(() => {
     setEditingTransaction(null);
@@ -84,6 +126,10 @@ export default function TransactionsClientWrapper({
 
   const handleDeleteTransaction = useCallback(
     async (id) => {
+      if (!confirm("Are you sure you want to delete this transaction?")) {
+        return;
+      }
+
       setIsLoading(true);
       try {
         const response = await fetch(`/api/transactions/${id}`, {
@@ -94,15 +140,12 @@ export default function TransactionsClientWrapper({
           throw new Error("Failed to delete transaction");
         }
 
-        // Remove from local state
         setTransactions((prev) => prev.filter((t) => t.id !== id));
 
-        // Reset to first page if we're on a page that might now be empty
         if (currentTransactions.length === 1 && currentPage > 1) {
           setCurrentPage(currentPage - 1);
         }
 
-        // Refresh to update dashboard stats
         router.refresh();
       } catch (error) {
         console.error("Error deleting transaction:", error);
@@ -128,9 +171,6 @@ export default function TransactionsClientWrapper({
     async (newTransaction) => {
       setIsLoading(true);
       try {
-        // Normalize the type to lowercase for comparison
-        const transactionType = newTransaction.type.toLowerCase();
-
         const response = await fetch("/api/transactions", {
           method: "POST",
           headers: {
@@ -141,7 +181,7 @@ export default function TransactionsClientWrapper({
             name: newTransaction.name,
             description: newTransaction.description,
             amount: parseFloat(newTransaction.amount),
-            type: transactionType, // Already lowercase from modal
+            type: newTransaction.type === "Income" ? "income" : "expense",
             date: newTransaction.date,
             recurring: newTransaction.recurring || false,
             recurringInterval: newTransaction.recurringInterval || null,
@@ -154,21 +194,19 @@ export default function TransactionsClientWrapper({
 
         const data = await response.json();
 
-        // Find category info
         const category = categories.find(
           (c) => c.id === newTransaction.categoryId
         );
 
-        // Add to local state with formatted data
         const transactionToAdd = {
           id: data.id,
           name: newTransaction.name,
           description: newTransaction.description,
           amount:
-            transactionType === "income"
+            newTransaction.type === "Income"
               ? Math.abs(parseFloat(newTransaction.amount))
               : -Math.abs(parseFloat(newTransaction.amount)),
-          type: transactionType === "income" ? "Income" : "Expense", // Capitalize for display
+          type: newTransaction.type === "Income" ? "Income" : "Expense",
           category: category?.name || "Other",
           category_icon: category?.icon || "default",
           category_color: category?.color || "#6B7280",
@@ -194,9 +232,6 @@ export default function TransactionsClientWrapper({
     async (updatedTransaction) => {
       setIsLoading(true);
       try {
-        // Normalize the type to lowercase for comparison
-        const transactionType = updatedTransaction.type.toLowerCase();
-
         const response = await fetch(
           `/api/transactions/${updatedTransaction.id}`,
           {
@@ -209,7 +244,7 @@ export default function TransactionsClientWrapper({
               name: updatedTransaction.name,
               description: updatedTransaction.description,
               amount: parseFloat(updatedTransaction.amount),
-              type: transactionType, // Already lowercase from modal
+              type: updatedTransaction.type === "Income" ? "income" : "expense",
               date: updatedTransaction.date,
               recurring: updatedTransaction.recurring || false,
               recurringInterval: updatedTransaction.recurringInterval || null,
@@ -221,12 +256,10 @@ export default function TransactionsClientWrapper({
           throw new Error("Failed to update transaction");
         }
 
-        // Find category info
         const category = categories.find(
           (c) => c.id === updatedTransaction.categoryId
         );
 
-        // Update local state
         setTransactions((prev) =>
           prev.map((t) =>
             t.id === updatedTransaction.id
@@ -235,10 +268,11 @@ export default function TransactionsClientWrapper({
                   name: updatedTransaction.name,
                   description: updatedTransaction.description,
                   amount:
-                    transactionType === "income"
+                    updatedTransaction.type === "Income"
                       ? Math.abs(parseFloat(updatedTransaction.amount))
                       : -Math.abs(parseFloat(updatedTransaction.amount)),
-                  type: transactionType === "income" ? "Income" : "Expense", // Capitalize for display
+                  type:
+                    updatedTransaction.type === "Income" ? "Income" : "Expense",
                   category: category?.name || t.category,
                   category_icon: category?.icon || t.category_icon,
                   category_color: category?.color || t.category_color,
@@ -278,7 +312,7 @@ export default function TransactionsClientWrapper({
           typeFilter={typeFilter}
           sortBy={sortBy}
           onClearSearch={() => setSearchTerm("")}
-          onClearCategory={() => setCategoryFilter("all")}
+          onClearCategory={handleClearCategory}
           onClearType={() => setTypeFilter("all")}
           onClearSort={() => setSortBy("latest")}
           onClearAll={clearFilters}
@@ -290,7 +324,7 @@ export default function TransactionsClientWrapper({
           sortBy={sortBy}
           setSortBy={setSortBy}
           categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
+          setCategoryFilter={handleCategoryFilterChange}
           typeFilter={typeFilter}
           setTypeFilter={setTypeFilter}
           categories={categories}

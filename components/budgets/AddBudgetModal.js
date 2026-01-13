@@ -1,9 +1,10 @@
+// components/budgets/AddBudgetModal.jsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
-import { themeColors, categories } from "@/data/transactionsData";
+import { THEME_COLORS } from "@/lib/constants";
 
 export default function AddBudgetModal({
   isOpen,
@@ -12,247 +13,520 @@ export default function AddBudgetModal({
   onUpdateBudget,
   editingBudget,
   existingBudgets = [],
+  categories = [],
+  isLoading = false,
 }) {
   const [formData, setFormData] = useState({
-    category: "",
-    maxSpend: "",
-    theme: "teal-600",
+    name: "",
+    max: "",
+    color: "",
+    categoryId: "",
+    period: "monthly",
   });
 
-  // Get colors that aren't already used
-  const getAvailableColors = () => {
-    const usedColors = existingBudgets.map((budget) => budget.color);
-    return themeColors.filter(
-      (color) =>
-        !usedColors.includes(color.bgClass) ||
-        (editingBudget && editingBudget.color === color.bgClass)
+  const [errors, setErrors] = useState({});
+
+  // Get colors that are already used by other budgets
+  const usedColors = useMemo(() => {
+    return existingBudgets
+      .filter((b) => !editingBudget || b.id !== editingBudget.id)
+      .map((b) => b.color);
+  }, [existingBudgets, editingBudget]);
+
+  // Get the first available color
+  const getFirstAvailableColor = () => {
+    const availableColor = THEME_COLORS.find(
+      (color) => !usedColors.includes(color.hex)
     );
+    return availableColor?.hex || THEME_COLORS[0].hex;
   };
 
-  const availableColors = getAvailableColors();
+  // Filter expense categories only
+  const expenseCategories = useMemo(() => {
+    return categories.filter((c) => c.type === "expense" || c.type === "both");
+  }, [categories]);
 
-  // Reset form when modal opens
+  // Reset form when modal opens/closes
   useEffect(() => {
-    if (editingBudget) {
-      setFormData({
-        category: editingBudget.name || "",
-        maxSpend: editingBudget.max?.toString() || "",
-        theme: editingBudget.color?.replace("bg-", "") || "teal-600",
-      });
-    } else {
-      setFormData({
-        category: "",
-        maxSpend: "",
-        theme: availableColors[0]?.value || "teal-600",
-      });
+    if (isOpen) {
+      if (editingBudget) {
+        const category = categories.find(
+          (c) =>
+            c.name === editingBudget.category_name ||
+            c.name === editingBudget.name
+        );
+
+        setFormData({
+          name: editingBudget.name || "",
+          max: editingBudget.max?.toString() || "",
+          color: editingBudget.color || getFirstAvailableColor(),
+          categoryId:
+            category?.id?.toString() ||
+            editingBudget.category_id?.toString() ||
+            "",
+          period: editingBudget.period || "monthly",
+        });
+      } else {
+        setFormData({
+          name: "",
+          max: "",
+          color: getFirstAvailableColor(),
+          categoryId: "",
+          period: "monthly",
+        });
+      }
+      setErrors({});
     }
-  }, [editingBudget, isOpen]);
+  }, [isOpen, editingBudget, categories, usedColors]);
+
+  // Update name when category changes
+  useEffect(() => {
+    if (formData.categoryId && !editingBudget) {
+      const category = categories.find(
+        (c) => c.id.toString() === formData.categoryId
+      );
+      if (category) {
+        setFormData((prev) => ({ ...prev, name: category.name }));
+      }
+    }
+  }, [formData.categoryId, categories, editingBudget]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleColorSelect = (colorHex) => {
+    // Only allow selection if color is not used
+    if (!usedColors.includes(colorHex)) {
+      setFormData((prev) => ({ ...prev, color: colorHex }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+    }
+
+    if (!formData.max || parseFloat(formData.max) <= 0) {
+      newErrors.max = "Please enter a valid amount";
+    }
+
+    if (!formData.categoryId) {
+      newErrors.categoryId = "Please select a category";
+    }
+
+    if (!formData.color) {
+      newErrors.color = "Please select a color";
+    }
+
+    // Check for duplicate budget (same category)
+    if (!editingBudget) {
+      const duplicate = existingBudgets.find(
+        (b) => b.category_id?.toString() === formData.categoryId
+      );
+      if (duplicate) {
+        newErrors.categoryId = "A budget for this category already exists";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.category || !formData.maxSpend) {
-      alert("Please fill in all required fields");
+
+    if (!validateForm()) {
       return;
     }
 
     const budgetData = {
-      id: editingBudget ? editingBudget.id : Date.now(),
-      name: formData.category,
-      max: parseFloat(formData.maxSpend),
-      color: `bg-${formData.theme}`,
-      spend: editingBudget?.spend || 0,
+      ...formData,
+      categoryId: parseInt(formData.categoryId),
+      max: parseFloat(formData.max),
     };
 
-    editingBudget ? onUpdateBudget(budgetData) : onAddBudget(budgetData);
-    onClose();
+    if (editingBudget) {
+      onUpdateBudget({
+        ...budgetData,
+        id: editingBudget.id,
+      });
+    } else {
+      onAddBudget(budgetData);
+    }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleClose = () => {
+    if (!isLoading) {
+      onClose();
+    }
   };
-
-  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          transition={{ type: "spring", damping: 25 }}
-          className="bg-background rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-text/10">
-            <div>
-              <h2 className="text-foreground text-xl font-bold">
-                {editingBudget ? "Edit Budget" : "Add New Budget"}
-              </h2>
-              <p className="text-text/70 text-sm mt-1">
-                Choose a category to set a spending budget.
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <FiX className="text-lg" />
-            </button>
-          </div>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="budget-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50"
+            onClick={handleClose}
+          />
 
-          {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]"
+          {/* Desktop Modal */}
+          <motion.div
+            key="budget-modal-desktop"
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: "spring", damping: 25 }}
+            className="hidden sm:block fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-background rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="space-y-5">
-              {/* Category Field */}
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-text/10">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Budget Category <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-text/20 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all appearance-none"
-                    required
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-3 pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-text/50"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </div>
+                <h2 className="text-foreground text-lg font-bold">
+                  {editingBudget ? "Edit Budget" : "Add New Budget"}
+                </h2>
+                <p className="text-text/70 text-sm">
+                  {editingBudget
+                    ? "Update budget details"
+                    : "Set a spending limit"}
+                </p>
               </div>
-
-              {/* Maximum Spend Field */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Maximum Spend <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-3.5 text-text/50">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    name="maxSpend"
-                    value={formData.maxSpend}
-                    onChange={handleChange}
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    className="w-full pl-8 pr-4 py-3 rounded-lg border border-text/20 bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Theme Selection */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Theme Color
-                </label>
-                <div className="relative">
-                  <select
-                    name="theme"
-                    value={formData.theme}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-text/20 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all appearance-none"
-                  >
-                    {availableColors.map((color) => (
-                      <option key={color.value} value={color.value}>
-                        {color.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-3 pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-text/50"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Color Preview */}
-                <div className="mt-3 flex items-center gap-3 p-3 rounded-lg border border-text/10 bg-background/50">
-                  <div
-                    className={`w-8 h-8 rounded-full bg-${formData.theme}`}
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {themeColors.find((c) => c.value === formData.theme)
-                        ?.name || "Color"}
-                    </p>
-                    <p className="text-xs text-text/70">Preview</p>
-                  </div>
-                </div>
-
-                {availableColors.length === 0 && (
-                  <p className="text-sm text-yellow-600 mt-2">
-                    All colors used. Edit existing to change.
-                  </p>
-                )}
-              </div>
+              <button
+                onClick={handleClose}
+                disabled={isLoading}
+                className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+              >
+                <FiX className="text-lg" />
+              </button>
             </div>
 
-            {/* Footer Buttons */}
-            <div className="flex gap-3 pt-6 mt-6 border-t border-text/10">
+            {/* Form */}
+            <form
+              onSubmit={handleSubmit}
+              className="p-5 overflow-y-auto max-h-[calc(90vh-80px)]"
+            >
+              <BudgetFormContent
+                formData={formData}
+                errors={errors}
+                expenseCategories={expenseCategories}
+                usedColors={usedColors}
+                isLoading={isLoading}
+                handleChange={handleChange}
+                handleColorSelect={handleColorSelect}
+              />
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-5 mt-5 border-t border-text/10">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-text/20 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-medium disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-foreground hover:bg-primary/20 hover:text-foreground text-background font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <LoadingSpinner />
+                      {editingBudget ? "Updating..." : "Adding..."}
+                    </>
+                  ) : editingBudget ? (
+                    "Update"
+                  ) : (
+                    "Add Budget"
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+
+          {/* Mobile Bottom Sheet */}
+          <motion.div
+            key="budget-modal-mobile"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-2xl shadow-2xl max-h-[85vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-text/10">
               <button
                 type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-3 rounded-lg border border-text/20 hover:border-text/40 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-medium"
+                onClick={handleClose}
+                disabled={isLoading}
+                className="text-text/70 text-sm font-medium disabled:opacity-50"
               >
                 Cancel
               </button>
+              <h2 className="text-foreground text-base font-semibold">
+                {editingBudget ? "Edit Budget" : "Add Budget"}
+              </h2>
               <button
-                type="submit"
-                className="flex-1 px-4 py-3 rounded-lg bg-foreground hover:bg-foreground/90 dark:hover:bg-primary/20 dark:hover:text-foreground transition-all hover:cursor-pointer text-background font-semibold shadow-lg hover:shadow-xl active:scale-95 duration-200"
-                disabled={availableColors.length === 0 && !editingBudget}
+                type="button"
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="text-primary text-sm font-semibold disabled:opacity-50"
               >
-                {editingBudget ? "Update Budget" : "Add Budget"}
+                {isLoading ? "..." : editingBudget ? "Save" : "Add"}
               </button>
             </div>
-          </form>
-        </motion.div>
-      </motion.div>
+
+            {/* Drag Handle */}
+            <div className="flex justify-center py-2">
+              <div className="w-10 h-1 bg-text/20 rounded-full" />
+            </div>
+
+            {/* Mobile Form */}
+            <form
+              onSubmit={handleSubmit}
+              className="px-4 pb-6 overflow-y-auto max-h-[calc(85vh-60px)]"
+            >
+              <BudgetFormContent
+                formData={formData}
+                errors={errors}
+                expenseCategories={expenseCategories}
+                usedColors={usedColors}
+                isLoading={isLoading}
+                handleChange={handleChange}
+                handleColorSelect={handleColorSelect}
+                isMobile
+              />
+              <div className="h-4" />
+            </form>
+          </motion.div>
+        </>
+      )}
     </AnimatePresence>
+  );
+}
+
+function LoadingSpinner() {
+  return (
+    <svg
+      className="animate-spin h-4 w-4"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
+  );
+}
+
+function BudgetFormContent({
+  formData,
+  errors,
+  expenseCategories,
+  usedColors,
+  isLoading,
+  handleChange,
+  handleColorSelect,
+  isMobile = false,
+}) {
+  return (
+    <div className={`space-y-${isMobile ? "3" : "4"}`}>
+      {/* Category */}
+      <div>
+        <label className="block text-xs font-medium text-foreground mb-1.5">
+          Category <span className="text-red-500">*</span>
+        </label>
+        <select
+          name="categoryId"
+          value={formData.categoryId}
+          onChange={handleChange}
+          disabled={isLoading}
+          className={`w-full px-3 py-2.5 rounded-lg border text-sm ${
+            errors.categoryId ? "border-red-500" : "border-text/20"
+          } bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50`}
+        >
+          <option value="">Select a category</option>
+          {expenseCategories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+        {errors.categoryId && (
+          <p className="mt-1 text-xs text-red-500">{errors.categoryId}</p>
+        )}
+      </div>
+
+      {/* Budget Name */}
+      <div>
+        <label className="block text-xs font-medium text-foreground mb-1.5">
+          Budget Name <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="e.g., Groceries Budget"
+          className={`w-full px-3 py-2.5 rounded-lg border text-sm ${
+            errors.name ? "border-red-500" : "border-text/20"
+          } bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50`}
+          disabled={isLoading}
+        />
+        {errors.name && (
+          <p className="mt-1 text-xs text-red-500">{errors.name}</p>
+        )}
+      </div>
+
+      {/* Maximum Amount */}
+      <div>
+        <label className="block text-xs font-medium text-foreground mb-1.5">
+          Maximum Spend <span className="text-red-500">*</span>
+        </label>
+        <div className="relative">
+          <span className="absolute left-3 top-2.5 text-text/50 text-sm">
+            $
+          </span>
+          <input
+            type="number"
+            name="max"
+            value={formData.max}
+            onChange={handleChange}
+            placeholder="0.00"
+            min="0"
+            step="0.01"
+            disabled={isLoading}
+            className={`w-full pl-7 pr-3 py-2.5 rounded-lg border text-sm ${
+              errors.max ? "border-red-500" : "border-text/20"
+            } bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50`}
+          />
+        </div>
+        {errors.max && (
+          <p className="mt-1 text-xs text-red-500">{errors.max}</p>
+        )}
+      </div>
+
+      {/* Period */}
+      <div>
+        <label className="block text-xs font-medium text-foreground mb-1.5">
+          Budget Period
+        </label>
+        <select
+          name="period"
+          value={formData.period}
+          onChange={handleChange}
+          disabled={isLoading}
+          className="w-full px-3 py-2.5 rounded-lg border border-text/20 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+        >
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+
+      {/* Color Picker */}
+      <div>
+        <label className="block text-xs font-medium text-foreground mb-2">
+          Color Theme <span className="text-red-500">*</span>
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {THEME_COLORS.map((color) => {
+            const isUsed = usedColors.includes(color.hex);
+            const isSelected = formData.color === color.hex;
+
+            return (
+              <button
+                key={color.hex}
+                type="button"
+                onClick={() => handleColorSelect(color.hex)}
+                disabled={isLoading || isUsed}
+                className={`relative w-8 h-8 rounded-full transition-all ${
+                  isSelected
+                    ? "ring-2 ring-offset-2 ring-primary scale-110"
+                    : isUsed
+                    ? "opacity-30 cursor-not-allowed"
+                    : "hover:scale-105"
+                } disabled:cursor-not-allowed`}
+                style={{ backgroundColor: color.hex }}
+                title={isUsed ? `${color.name} (Already used)` : color.name}
+              >
+                {isUsed && !isSelected && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-white drop-shadow-md"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={3}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </span>
+                )}
+                {isSelected && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-white drop-shadow-md"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={3}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {errors.color && (
+          <p className="mt-1 text-xs text-red-500">{errors.color}</p>
+        )}
+        <p className="mt-2 text-xs text-text/50">
+          {usedColors.length > 0
+            ? `${THEME_COLORS.length - usedColors.length} colors available`
+            : "All colors available"}
+        </p>
+      </div>
+    </div>
   );
 }
