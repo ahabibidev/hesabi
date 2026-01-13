@@ -461,7 +461,7 @@ function BudgetFormContent({
         <label className="block text-xs font-medium text-foreground mb-2">
           Color Theme <span className="text-red-500">*</span>
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex justify-center flex-wrap gap-3 md:gap-4">
           {THEME_COLORS.map((color) => {
             const isUsed = usedColors.includes(color.hex);
             const isSelected = formData.color === color.hex;
