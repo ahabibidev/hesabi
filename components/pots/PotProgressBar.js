@@ -1,11 +1,9 @@
+// components/pots/PotProgressBar.jsx
 import { memo } from "react";
-import {
-  calculateProgress,
-  formatPercentage,
-  formatCurrency,
-} from "@/utils/potsUtils";
+import { calculateProgress, formatPercentage } from "@/utils/potsUtils";
+import { formatCurrency } from "@/lib/constants";
 
-function PotProgressBar({ saved, target, progressColor }) {
+function PotProgressBar({ saved, target, progressColor, currency = "USD" }) {
   const progressPercentage = calculateProgress(saved, target);
   const formattedPercentage = formatPercentage(saved, target);
 
@@ -27,7 +25,7 @@ function PotProgressBar({ saved, target, progressColor }) {
       <p className="flex justify-between mt-2 font-bold text-sm">
         <span>{formattedPercentage}%</span>
         <span className="font-normal text-text">
-          of ${formatCurrency(target)}
+          of {formatCurrency(target, currency)}
         </span>
       </p>
     </div>

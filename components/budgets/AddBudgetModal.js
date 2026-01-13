@@ -359,6 +359,8 @@ function BudgetFormContent({
   handleColorSelect,
   isMobile = false,
 }) {
+  const selectedColor = THEME_COLORS.find((c) => c.hex === formData.color);
+
   return (
     <div className={`space-y-${isMobile ? "3" : "4"}`}>
       {/* Category */}
@@ -521,11 +523,22 @@ function BudgetFormContent({
         {errors.color && (
           <p className="mt-1 text-xs text-red-500">{errors.color}</p>
         )}
-        <p className="mt-2 text-xs text-text/50">
-          {usedColors.length > 0
-            ? `${THEME_COLORS.length - usedColors.length} colors available`
-            : "All colors available"}
-        </p>
+
+        {/* Color Preview - Add this */}
+        {selectedColor && (
+          <div className="mt-3 flex items-center gap-3 p-3 rounded-lg border border-text/10 bg-background/50">
+            <div
+              className="w-8 h-8 rounded-full"
+              style={{ backgroundColor: selectedColor.hex }}
+            />
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                {selectedColor.name}
+              </p>
+              <p className="text-xs text-text/70">Selected color</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

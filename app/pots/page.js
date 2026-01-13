@@ -1,12 +1,24 @@
+// app/pots/page.jsx
+import { redirect } from "next/navigation";
 import DashboardLayout from "../dashboard/DashboardLayout";
 import PotsClientWrapper from "@/components/pots/PotsClientWrapper";
-import { potsData } from "@/data/transactionsData";
+import { getPotsData } from "@/lib/pots";
 
-// This is a SERVER component
-export default function PotsPage() {
+export default async function PotsPage() {
+  const data = await getPotsData();
+
+  if (!data) {
+    redirect("/login");
+  }
+
+  const { user, pots } = data;
+
   return (
     <DashboardLayout>
-      <PotsClientWrapper initialPots={potsData} />
+      <PotsClientWrapper
+        initialPots={pots}
+        currency={user?.currency || "USD"}
+      />
     </DashboardLayout>
   );
 }
