@@ -13,7 +13,7 @@
 }
 
 /* Dark mode */
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     --background: 220 30% 8%;
     --foreground: 210 40% 98%;

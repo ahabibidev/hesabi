@@ -24,6 +24,7 @@ export default function TransactionRow({
 
   // Use name field (new) or sender field (old)
   const displayName = transaction.name || transaction.sender;
+  const transactionDetails = transaction.description || transaction.details;
 
   // Format date - handle both formats
   const displayDate =
@@ -42,7 +43,7 @@ export default function TransactionRow({
     >
       <div className="flex gap-4 items-center">
         <div
-          className="p-2 w-10 h-10 rounded-full flex items-center justify-center"
+          className=" p-2 w-10 h-10 rounded-full flex items-center justify-center"
           style={{ backgroundColor: categoryColor }}
         >
           <CategoryIcon
@@ -50,7 +51,12 @@ export default function TransactionRow({
             className="text-white w-5 h-5"
           />
         </div>
-        <p>{displayName}</p>
+        <p className="font-medium flex flex-col">
+          {displayName}
+          <span className="text-text text-sm font-light">
+            {transactionDetails}
+          </span>
+        </p>
       </div>
       <div>
         <p className={`font-bold text-right ${getAmountColor(amount)}`}>
