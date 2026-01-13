@@ -8,9 +8,7 @@ import ThemeToggle from "./ThemeToggle";
 const PreferencesCard = memo(function PreferencesCard({
   userProfile,
   currencyOptions,
-  darkMode,
   onCurrencySelect,
-  onToggleDarkMode,
 }) {
   return (
     <div className="bg-background shadow-xl dark:bg-linear-45 dark:from-background dark:to-primary/20 border border-text/10 rounded-2xl p-6">
