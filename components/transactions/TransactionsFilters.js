@@ -46,7 +46,7 @@ export default function TransactionsFilters({
             <input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-lg border border-text/20 bg-background dark:bg-gray-900 px-4 py-3 pr-12 text-foreground placeholder:text-text/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent transition-all duration-200 text-sm"
+              className="w-full rounded-lg border border-text/20 bg-input-background px-4 py-3 pr-12 text-foreground placeholder:text-text/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent transition-all duration-200 text-sm"
               placeholder="Search transactions..."
             />
             <SlMagnifier className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-text/50 text-sm" />
@@ -67,7 +67,7 @@ export default function TransactionsFilters({
                 sortBy !== "latest"
                   ? "border-primary/50 bg-primary/10"
                   : "border-text/20"
-              } bg-background dark:bg-gray-900 p-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all duration-200`}
+              } bg-input-background p-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all duration-200`}
               aria-label="Sort options"
             >
               <FiFilter className="text-base" />
@@ -79,7 +79,7 @@ export default function TransactionsFilters({
                 categoryFilter !== "all"
                   ? "border-primary/50 bg-primary/10"
                   : "border-text/20"
-              } bg-background dark:bg-gray-900 p-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all duration-200`}
+              } bg-input-background p-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all duration-200`}
               aria-label="Category filter"
             >
               <FiGrid className="text-base" />
@@ -94,7 +94,7 @@ export default function TransactionsFilters({
           <input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-xl border border-text/20 bg-background dark:bg-gray-900 px-4 py-3 pr-12 text-foreground placeholder:text-text/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent transition-all duration-200"
+            className="w-full rounded-xl border border-text/20 bg-input-background px-4 py-3 pr-12 text-foreground placeholder:text-text/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent transition-all duration-200"
             placeholder="Search transactions, categories, or amounts..."
           />
           <SlMagnifier className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-text/50" />
@@ -114,7 +114,7 @@ export default function TransactionsFilters({
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="rounded-xl border border-text/20 bg-background dark:bg-gray-900 px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent min-w-35 cursor-pointer transition-all duration-200"
+              className="rounded-xl border border-text/20 bg-input-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent min-w-35 cursor-pointer transition-all duration-200"
             >
               {sortOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -129,7 +129,7 @@ export default function TransactionsFilters({
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="rounded-xl border border-text/20 bg-background dark:bg-gray-900 px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent min-w-45 cursor-pointer transition-all duration-200"
+              className="rounded-xl border border-text/20 bg-input-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent min-w-45 cursor-pointer transition-all duration-200"
             >
               <option value="all">All Categories</option>
               {categoryOptions.map((category) => (
@@ -145,7 +145,7 @@ export default function TransactionsFilters({
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="rounded-xl border border-text/20 bg-background dark:bg-gray-900 px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent min-w-35 cursor-pointer transition-all duration-200"
+              className="rounded-xl border border-text/20 bg-input-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent min-w-35 cursor-pointer transition-all duration-200"
             >
               <option value="all">All Types</option>
               <option value="Income">Income</option>

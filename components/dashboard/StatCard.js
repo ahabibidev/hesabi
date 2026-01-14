@@ -5,8 +5,7 @@ export default function StatCard({ title, value, variant = "default" }) {
 
   const variantClasses = {
     default: "bg-foreground",
-    gradient:
-      "bg-background shadow-xl dark:bg-linear-45 dark:from-background dark:to-primary/20 border border-text/10",
+    gradient: "bg-background shadow-xl bg-brand-gradient border border-text/10",
   };
 
   const textColorClasses = {

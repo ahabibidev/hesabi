@@ -42,7 +42,7 @@ export default function TransactionsTableView({
     >
       <table className="w-full">
         {/* Desktop Headers */}
-        <thead className="hidden sm:table-header-group bg-gray-50 dark:bg-gray-900/50 border-b border-text/10">
+        <thead className="hidden sm:table-header-group bg-table-header border-b border-text/10">
           <tr>
             <th className="py-4 px-6 text-left text-sm font-semibold text-text uppercase tracking-wider">
               Recipient / Sender
@@ -66,7 +66,7 @@ export default function TransactionsTableView({
         </thead>
 
         {/* Mobile Headers */}
-        <thead className="sm:hidden bg-gray-50 dark:bg-gray-900/50 border-b border-text/10">
+        <thead className="sm:hidden bg-table-header border-b border-text/10">
           <tr>
             <th className="py-3 px-4 text-left text-sm font-semibold text-text uppercase tracking-wider">
               Transaction
@@ -80,7 +80,7 @@ export default function TransactionsTableView({
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+        <tbody className="divide-y divide-text/10">
           {transactions.map((tx) => (
             <tr key={tx.id}>
               <TransactionDesktopRow

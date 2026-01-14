@@ -13,7 +13,7 @@ export default function TransactionsPagination({
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-text/10">
-      <div className="text-sm text-text/70">
+      <div className="hidden md:block text-sm text-text/70">
         Showing{" "}
         <span className="font-medium text-foreground">
           {startIndex + 1}-{Math.min(endIndex, totalFiltered)}

@@ -14,14 +14,21 @@ export default function MobileFilterModal({
         className="fixed inset-0 bg-black/50 z-40 sm:hidden"
         onClick={onClose}
       />
-      <div className="fixed bottom-0 left-0 right-0 bg-background rounded-t-2xl z-50 p-6 sm:hidden animate-slide-up">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button onClick={onClose} className="p-2" aria-label="Close">
-            <FiX className="text-lg" />
-          </button>
+      <div className="fixed bottom-0 left-0 right-0 bg-background rounded-t-2xl z-50 sm:hidden animate-slide-up max-h-[85vh]">
+        {/* Header */}
+        <div className="sticky top-0 bg-background z-10 p-6 pb-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">{title}</h3>
+            <button onClick={onClose} className="p-2" aria-label="Close">
+              <FiX className="text-lg" />
+            </button>
+          </div>
         </div>
-        {children}
+
+        {/* Content with scrolling */}
+        <div className="overflow-y-auto h-[calc(85vh-80px)] px-6 pb-6">
+          {children}
+        </div>
       </div>
 
       <style jsx>{`

@@ -11,6 +11,8 @@
   --primary: 220 85% 57%;
   --accent: 220 70% 45%;
   --brand-gradient: linear-gradient(0deg, #f8fafc, #f8fafc);
+  --input-background: #f8fafc;
+  --table-header: f9fafb;
 }
 
 /* Dark mode - via .dark class (manual toggle) */
@@ -23,6 +25,8 @@
   --accent: 220 70% 45%;
 
   --brand-gradient: linear-gradient(45deg, #0e121b, RGB(53, 114, 239, 0.2));
+  --input-background: #101828;
+  --table-header: RGB(16, 24, 40, 0.5);
 }
 
 /* Dark mode - via system preference (auto mode) */
@@ -36,6 +40,8 @@
     --accent: 220 70% 45%;
 
     --brand-gradient: linear-gradient(45deg, #0e121b, RGB(53, 114, 239, 0.2));
+    --input-background: #101828;
+    --table-header: RGB(16, 24, 40, 0.5);
   }
 }
 
@@ -47,6 +53,8 @@
   --color-text: hsl(var(--text));
   --color-primary: hsl(var(--primary));
   --color-accent: hsl(var(--accent));
+  --color-input-background: var(--input-background);
+  --color-table-header: var(--table-header);
 
   --font-sans: var(--font-poppins);
 }

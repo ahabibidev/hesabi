@@ -66,7 +66,7 @@ function TransactionMobileRow({
           <div className="relative shrink-0">
             {/* Category icon with color background */}
             <div
-              className="h-8 w-8 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-gray-800"
+              className="h-8 w-8 rounded-full flex items-center justify-center ring-2 ring-text/30"
               style={{ backgroundColor: categoryColor }}
             >
               <CategoryIcon
