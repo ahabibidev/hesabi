@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import googleLogo from "@/public/google.svg";
 import facebookLogo from "@/public/facebook.svg";
-import appleLogo from "@/public/apple.svg";
+import githubLogo from "@/public/github.svg";
 
 export default function AuthFormLayout({
   title,
@@ -60,11 +60,12 @@ export default function AuthFormLayout({
                 <Image width={35} src={facebookLogo} alt="facebook logo" />
               </button>
               <button
+                id="github-logo"
                 type="button"
-                className="cursor-pointer hover:opacity-80 transition-opacity dark:invert"
+                className="cursor-pointer hover:opacity-80 transition-opacity"
                 aria-label="Sign in with Apple"
               >
-                <Image width={35} src={appleLogo} alt="apple logo" />
+                <Image width={35} src={githubLogo} alt="github logo" />
               </button>
             </div>
           </div>

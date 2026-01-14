@@ -20,6 +20,10 @@
   --color-expense-text: #991b1b;
 }
 
+.dark #github-logo {
+  filter: invert(100%);
+}
+
 /* Dark mode - via .dark class (manual toggle) */
 .dark {
   --background: 220 30% 8%;
