@@ -41,10 +41,16 @@ export const authOptions = {
           throw new Error("No user found with this email");
         }
 
+        // Check if user signed up with OAuth
         if (!user.password) {
           throw new Error(
             `This email is registered with ${user.provider}. Please sign in with ${user.provider}.`
           );
+        }
+
+        // Check if email is verified
+        if (user.email_verified === 0) {
+          throw new Error("Please verify your email before logging in");
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -72,7 +78,9 @@ export const authOptions = {
       // Handle OAuth sign in
       if (account?.provider === "google" || account?.provider === "github") {
         try {
-          const email = user.email;
+          // FIX 3: Ensure OAuth emails are also handled as lowercase for consistency
+          const email = user.email.toLowerCase();
+
           const name = user.name || profile?.name || email.split("@")[0];
           const avatar =
             user.image ||
@@ -110,6 +118,8 @@ export const authOptions = {
       }
 
       if (account?.provider === "google" || account?.provider === "github") {
+        // Note: Make sure getUserByEmail inside your db.js also handles case-sensitivity
+        // if you want this to be perfectly robust, though usually OAuth returns consistent emails.
         const dbUser = getUserByEmail(token.email);
         if (dbUser) {
           token.id = dbUser.id.toString();
@@ -133,7 +143,7 @@ export const authOptions = {
 
   pages: {
     signIn: "/login",
-    error: "/login", // Redirect to login page on error
+    error: "/login",
   },
 
   session: {

@@ -75,23 +75,12 @@ export default function AuthFormLayout({
                 aria-label="Sign in with Google"
               >
                 {oauthLoading === "google" ? (
-                  <div className="w-[30px] h-[30px] flex items-center justify-center">
+                  <div className="w-7.5 h-7.5 flex items-center justify-center">
                     <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : (
                   <Image width={30} src={googleLogo} alt="google logo" />
                 )}
-              </button>
-
-              {/* Facebook Button (placeholder - not implemented) */}
-              <button
-                type="button"
-                disabled={isDisabled}
-                className="cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Sign in with Facebook"
-                onClick={() => alert("Facebook sign-in coming soon!")}
-              >
-                <Image width={35} src={facebookLogo} alt="facebook logo" />
               </button>
 
               {/* GitHub Button */}
@@ -104,7 +93,7 @@ export default function AuthFormLayout({
                 aria-label="Sign in with Github"
               >
                 {oauthLoading === "github" ? (
-                  <div className="w-[35px] h-[35px] flex items-center justify-center">
+                  <div className="w-8.75 h-8.75 flex items-center justify-center">
                     <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : (
