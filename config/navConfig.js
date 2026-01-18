@@ -1,3 +1,4 @@
+import { AiFillInfoCircle } from "react-icons/ai";
 import { RiBillLine } from "react-icons/ri";
 import {
   FiHome,
@@ -36,5 +37,11 @@ export const bottomNavItems = [
     label: "Settings",
     icon: FiSettings,
     href: "/settings",
+  },
+  {
+    name: "about",
+    label: "About",
+    icon: AiFillInfoCircle,
+    href: "/about",
   },
 ];

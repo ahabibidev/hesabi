@@ -9,8 +9,8 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: "My Personal Wallet",
-  description: "Manage your personal income, expenses, and budgets.",
+  title: "Hesabi",
+  description: "Know Where Your Money Goes",
 };
 
 export default function RootLayout({ children }) {

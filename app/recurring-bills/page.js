@@ -7,7 +7,7 @@ import DashboardLayout from "../dashboard/DashboardLayout";
 import RecurringBillsClientWrapper from "@/components/recurring-bills/RecurringBillsClientWrapper";
 
 export const metadata = {
-  title: "Recurring Bills | Personal Wallet",
+  title: "Recurring Bills | Hesabi",
   description: "View and manage your recurring bills and subscriptions",
 };
 

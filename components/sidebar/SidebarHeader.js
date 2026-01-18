@@ -14,7 +14,7 @@ export default function SidebarHeader({ isCollapsed, onToggle }) {
           </div>
         )}
 
-        {!isCollapsed && <h1 className="text-xl font-bold">FinancePro</h1>}
+        {!isCollapsed && <h1 className="text-xl font-bold">Hesabi</h1>}
       </div>
       <button
         onClick={onToggle}

@@ -42,6 +42,7 @@ export default function TransactionsTableView({
             <h3 className="text-xl font-semibold text-foreground mb-2">
               No Transactions yet
             </h3>
+            ``
             <p className="text-text/70">
               Create your first transaction to start managing your finances.
             </p>
