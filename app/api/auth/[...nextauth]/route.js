@@ -12,12 +12,42 @@ export const authOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      profile(profile) {
+        return {
+          id: profile.sub,
+          email: profile.email,
+          name: profile.given_name || profile.name?.split(" ")[0], // First name
+          lastName:
+            profile.family_name || profile.name?.split(" ").slice(1).join(" "), // Last name
+          image: profile.picture,
+        };
+      },
     }),
 
     // GitHub Provider
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      profile(profile) {
+        // GitHub doesn't provide separate first/last names, so we split
+        const nameParts = (profile.name || profile.login || "")
+          .trim()
+          .split(" ");
+        const firstName =
+          nameParts.length > 1
+            ? nameParts.slice(0, -1).join(" ")
+            : nameParts[0] || profile.login;
+        const lastName =
+          nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+
+        return {
+          id: profile.id.toString(),
+          email: profile.email,
+          name: firstName,
+          lastName: lastName,
+          image: profile.avatar_url,
+        };
+      },
     }),
 
     // Existing Credentials Provider
@@ -32,7 +62,6 @@ export const authOptions = {
           throw new Error("Please enter an email and password");
         }
 
-        // Use async queryOne instead of synchronous db.prepare().get()
         const user = await queryOne("SELECT * FROM users WHERE email = ?", [
           credentials.email,
         ]);
@@ -41,16 +70,15 @@ export const authOptions = {
           throw new Error("No user found with this email");
         }
 
-        // Check if user signed up with OAuth
         if (!user.password) {
           throw new Error(
-            `This email is registered with ${user.provider}. Please sign in with ${user.provider}.`
+            `This email is registered with ${user.provider}. Please sign in with ${user.provider}.`,
           );
         }
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.password
+          user.password,
         );
 
         if (!isPasswordValid) {
@@ -73,27 +101,27 @@ export const authOptions = {
       // Handle OAuth sign in
       if (account?.provider === "google" || account?.provider === "github") {
         try {
-          // Ensure OAuth emails are also handled as lowercase for consistency
           const email = user.email.toLowerCase();
 
-          const name = user.name || profile?.name || email.split("@")[0];
-          const avatar =
-            user.image ||
-            profile?.avatar_url || // GitHub
-            profile?.picture; // Google
+          // user.name and user.lastName are already parsed in the profile callbacks above
+          const firstName = user.name || email.split("@")[0];
+          const lastName = user.lastName || "";
+          const avatar = user.image;
 
-          // Create or link user (async)
+          // Create or link user with separate first and last names
           const dbUser = await createOAuthUser(
             email,
-            name,
+            firstName,
+            lastName,
             avatar,
             account.provider,
-            account.providerAccountId
+            account.providerAccountId,
           );
 
           // Update user object with database ID
           user.id = dbUser.id.toString();
           user.avatar = dbUser.avatar;
+          user.lastName = dbUser.last_name;
 
           return true;
         } catch (error) {
@@ -113,7 +141,6 @@ export const authOptions = {
       }
 
       if (account?.provider === "google" || account?.provider === "github") {
-        // Use async getUserByEmail
         const dbUser = await getUserByEmail(token.email);
         if (dbUser) {
           token.id = dbUser.id.toString();
