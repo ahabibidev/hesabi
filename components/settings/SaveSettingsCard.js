@@ -34,7 +34,7 @@ const SaveSettingsCard = memo(function SaveSettingsCard({
             <button
               onClick={onSave}
               disabled={isSaving || !hasChanges}
-              className={`px-8 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition-all duration-200 min-w-[140px] ${
+              className={`px-8 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition-all duration-200 min-w-35 ${
                 isSaving || !hasChanges ? "opacity-70 cursor-not-allowed" : ""
               }`}
               type="button"
