@@ -14,6 +14,25 @@ export function ThemeProvider({ children }) {
   const [resolvedTheme, setResolvedTheme] = useState("light");
   const [mounted, setMounted] = useState(false);
 
+  // ✅ Function to update favicon based on theme
+  const updateFavicon = (currentTheme) => {
+    console.log("🎨 Updating favicon for theme:", currentTheme);
+
+    const favicon = document.querySelector("link[rel='icon']");
+    const faviconPath =
+      currentTheme === "light" ? "/favicon-light.ico" : "/favicon-dark.ico";
+
+    if (favicon) {
+      favicon.href = faviconPath;
+    } else {
+      const newFavicon = document.createElement("link");
+      newFavicon.rel = "icon";
+      newFavicon.type = "image/x-icon";
+      newFavicon.href = faviconPath;
+      document.head.appendChild(newFavicon);
+    }
+  };
+
   // Load saved theme on mount
   useEffect(() => {
     setMounted(true);
@@ -43,6 +62,9 @@ export function ThemeProvider({ children }) {
     root.classList.add(effectiveTheme);
     setResolvedTheme(effectiveTheme);
 
+    // ✅ Update favicon
+    updateFavicon(effectiveTheme);
+
     // Save to localStorage
     localStorage.setItem("theme", theme);
   }, [theme, mounted]);
@@ -58,6 +80,9 @@ export function ThemeProvider({ children }) {
       document.documentElement.classList.remove("light", "dark");
       document.documentElement.classList.add(newTheme);
       setResolvedTheme(newTheme);
+
+      // ✅ Update favicon when system theme changes
+      updateFavicon(newTheme);
     };
 
     mediaQuery.addEventListener("change", handleChange);

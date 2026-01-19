@@ -11,11 +11,17 @@ const poppins = Poppins({
 export const metadata = {
   title: "Hesabi",
   description: "Know Where Your Money Goes",
+  icons: {
+    icon: "/favicon-dark.ico",
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon-dark.ico" type="image/x-icon" />
+      </head>
       <body
         suppressHydrationWarning
         className={`${poppins.variable} font-sans antialiased`}

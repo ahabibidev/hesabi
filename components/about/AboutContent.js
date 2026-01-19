@@ -2,6 +2,7 @@
 "use client";
 
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ScrollText,
@@ -20,6 +21,8 @@ import {
   Lock,
   Layout,
 } from "lucide-react";
+import darkLogo from "@/public/dark-logo.png";
+import lightLogo from "@/public/light-logo.png";
 
 export const APP_INFO = {
   name: "Hesabi",
@@ -119,14 +122,68 @@ const FEATURES = [
 ];
 
 export default function AboutContent() {
+  const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+
+    // Function to check theme
+    const checkTheme = () => {
+      // Check if 'dark' class exists on html element
+      const htmlElement = document.documentElement;
+      const isDarkMode = htmlElement.classList.contains("dark");
+
+      // Also check data-theme attribute as fallback
+      const dataTheme = htmlElement.getAttribute("data-theme");
+
+      console.log("Theme check:", {
+        isDarkMode,
+        dataTheme,
+        classes: htmlElement.className,
+      });
+
+      setIsDark(isDarkMode || dataTheme === "dark");
+    };
+
+    // Initial check
+    checkTheme();
+
+    // Watch for theme changes
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Select logo based on theme
+  const logoSrc = isDark ? darkLogo : lightLogo;
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="bg-brand-gradient border border-text/10 rounded-2xl p-8 text-center h-48" />
+        <div className="bg-brand-gradient border border-text/10 rounded-2xl p-6 md:p-8 h-96" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* App Header Card */}
       <div className="bg-brand-gradient border border-text/10 rounded-2xl p-8 text-center">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/20 mb-6">
-          <span className="text-4xl font-bold text-primary">H</span>
-        </div>
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">{APP_INFO.name}</h1>
+        <Image
+          className="mx-auto mb-2"
+          alt="Hesaby Logo"
+          width={200}
+          height={50}
+          src={logoSrc}
+          priority
+        />
         <p className="text-lg text-primary font-medium mb-4">
           {APP_INFO.tagline}
         </p>
@@ -194,7 +251,7 @@ export default function AboutContent() {
           Meet the Developer
         </h2>
 
-        <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+        <div className="flex flex-col  md:flex-row gap-6 items-center md:items-start">
           {/* Developer Image */}
           <div className="relative">
             <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden border-4 border-primary/20">
@@ -226,7 +283,7 @@ export default function AboutContent() {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 transition-all group"
+                  className="flex items-center gap-2 md:px-4 px-2 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 transition-all group"
                 >
                   <social.icon className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
                   <span className="text-sm font-medium">{social.name}</span>
@@ -238,7 +295,7 @@ export default function AboutContent() {
       </div>
 
       {/* Footer */}
-      <div className="text-center pt-6 ">
+      <div className="text-center pt-6">
         <p className="text-md text-text">
           Made with{" "}
           <Heart className="w-4 h-4 inline-block text-red-500 fill-red-500 mx-1" />{" "}
@@ -247,7 +304,7 @@ export default function AboutContent() {
         <p className="text-sm text-text/70 mt-2">
           © {APP_INFO.year} {APP_INFO.name}. All rights reserved.
         </p>
-        <div className="flex items-center justify-center mt-8">
+        <div className="flex flex-col md:flex-row items-center justify-center mt-8">
           <Link
             href="/about/privacy"
             className="text-sm text-primary hover:underline flex items-center gap-1"

@@ -1,5 +1,7 @@
 // components/sidebar/SidebarHeader.jsx
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import darkLogo from "@/public/dark-logo.png";
+import Image from "next/image";
 
 export default function SidebarHeader({ isCollapsed, onToggle }) {
   return (
@@ -11,21 +13,12 @@ export default function SidebarHeader({ isCollapsed, onToggle }) {
       >
         {/* Logo */}
         <div className="relative shrink-0">
-          <div className="w-11 h-11 bg-linear-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-lg shadow-primary/25">
-            <span className="text-xl font-bold text-white">H</span>
-          </div>
+          <Image alt="Logo" width={170} height={50} src={darkLogo} />
+
           <div className="absolute inset-0 bg-primary/20 rounded-xl blur-xl -z-10" />
         </div>
 
         {/* Brand Name */}
-        <div className="shrink-0 whitespace-nowrap">
-          <h1 className="text-xl font-bold bg-linear-to-r from-white to-white/80 bg-clip-text text-transparent">
-            Hesabi
-          </h1>
-          <p className="text-[10px] text-white/40 font-medium tracking-wider uppercase">
-            Finance Manager
-          </p>
-        </div>
       </div>
 
       {/* Toggle Button */}
