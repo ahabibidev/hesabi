@@ -1,3 +1,4 @@
+// components/sidebar/SidebarWrapper.jsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getUserById } from "@/lib/db";
@@ -23,12 +24,15 @@ export default async function SidebarWrapper() {
     const dbUser = await getUserById(session.user.id);
 
     if (dbUser) {
+      const firstName = dbUser.name || session.user.name || "User";
+      const lastName = dbUser.last_name || ""; // ✅ Changed from dbUser.lastName to dbUser.last_name
+
       userData = {
-        name: dbUser.name || session.user.name || "User",
-        lastName: dbUser.lastName || session.user.lastName || "",
+        name: firstName,
+        lastName: lastName,
         email: dbUser.email || session.user.email,
         avatar: dbUser.avatar || session.user.image || DEFAULT_AVATAR,
-        initials: getInitials(dbUser.name || session.user.name || "User"),
+        initials: getInitials(firstName, lastName), // ✅ Pass both names
       };
     }
   }
@@ -36,11 +40,17 @@ export default async function SidebarWrapper() {
   return <Sidebar userData={userData} />;
 }
 
-// Helper function to generate initials from name
-function getInitials(name) {
-  if (!name) return "U";
+// ✅ Updated helper function to use both first and last name
+function getInitials(firstName, lastName) {
+  if (!firstName) return "U";
 
-  const nameParts = name.trim().split(" ");
+  // If we have a last name, use first letter of each
+  if (lastName && lastName.trim()) {
+    return (firstName[0] + lastName[0]).toUpperCase();
+  }
+
+  // Otherwise, fall back to the old logic
+  const nameParts = firstName.trim().split(" ");
   if (nameParts.length === 1) {
     return nameParts[0].substring(0, 2).toUpperCase();
   }

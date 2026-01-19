@@ -48,7 +48,7 @@ const DEVELOPER = {
     },
     {
       name: "Portfolio",
-      url: "mailto:ahabibi@vercel.com",
+      url: "https://ahabibi.vercel.app",
       icon: Globe,
     },
   ],

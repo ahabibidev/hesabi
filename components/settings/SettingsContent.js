@@ -14,10 +14,8 @@ import { AVATAR_OPTIONS, CURRENCY_OPTIONS } from "@/lib/constants";
 import { useUserProfile } from "@/hooks/useUserProfile";
 
 export default function SettingsContent() {
-  // ===== 1. ROUTER =====
   const router = useRouter();
 
-  // ===== 2. CUSTOM HOOKS (this defines userProfile) =====
   const {
     userProfile,
     setUserProfile,
@@ -27,18 +25,49 @@ export default function SettingsContent() {
     updatePassword,
   } = useUserProfile();
 
-  // ===== 3. useState HOOKS =====
   const [passwordData, setPasswordData] = useState(DEFAULT_PASSWORD_DATA);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [hasChanges, setHasChanges] = useState(false);
   const [originalProfile, setOriginalProfile] = useState(null);
 
-  // ===== 4. useMemo HOOKS (AFTER useUserProfile, uses userProfile) =====
+  // ✅ Detect OAuth user by checking if avatar is from GitHub or Google
+  const isOAuthUser = useMemo(() => {
+    const avatar = userProfile.avatar || "";
+    const oauthAvatar = userProfile.oauthAvatar || "";
+
+    // Check if avatar is from GitHub or Google
+    const isExternalAvatar =
+      avatar.includes("avatars.githubusercontent.com") ||
+      avatar.includes("lh3.googleusercontent.com") ||
+      oauthAvatar.includes("avatars.githubusercontent.com") ||
+      oauthAvatar.includes("lh3.googleusercontent.com");
+
+    // Also check provider field if available
+    const hasProvider = userProfile.provider && userProfile.provider !== null;
+
+    // Debug in BROWSER console (F12)
+    console.log("=== OAUTH CHECK ===");
+    console.log("avatar:", avatar);
+    console.log("oauthAvatar:", oauthAvatar);
+    console.log("provider:", userProfile.provider);
+    console.log("hasPassword:", userProfile.hasPassword);
+    console.log("isExternalAvatar:", isExternalAvatar);
+    console.log("hasProvider:", hasProvider);
+    console.log("Final isOAuthUser:", isExternalAvatar || hasProvider);
+    console.log("==================");
+
+    return isExternalAvatar || hasProvider;
+  }, [
+    userProfile.avatar,
+    userProfile.oauthAvatar,
+    userProfile.provider,
+    userProfile.hasPassword,
+  ]);
+
   const dynamicAvatarOptions = useMemo(() => {
     const options = [...AVATAR_OPTIONS];
 
-    // If user has an OAuth avatar, add it to the beginning of options
     if (userProfile.oauthAvatar && !options.includes(userProfile.oauthAvatar)) {
       options.unshift(userProfile.oauthAvatar);
     }
@@ -46,15 +75,12 @@ export default function SettingsContent() {
     return options;
   }, [userProfile.oauthAvatar]);
 
-  // ===== 5. useEffect HOOKS =====
-  // Track original profile for change detection
   useEffect(() => {
     if (!isLoading && userProfile.email) {
       setOriginalProfile({ ...userProfile });
     }
   }, [isLoading, userProfile.email]);
 
-  // Scroll to top on message
   useEffect(() => {
     if (message.text) {
       const mainContent = document.getElementById("main-content");
@@ -67,7 +93,6 @@ export default function SettingsContent() {
     }
   }, [message]);
 
-  // Detect changes
   useEffect(() => {
     if (!originalProfile) return;
 
@@ -79,14 +104,14 @@ export default function SettingsContent() {
       userProfile.currency !== originalProfile.currency;
 
     const passwordChanged =
-      passwordData.currentPassword ||
-      passwordData.newPassword ||
-      passwordData.confirmPassword;
+      !isOAuthUser &&
+      (passwordData.currentPassword ||
+        passwordData.newPassword ||
+        passwordData.confirmPassword);
 
     setHasChanges(profileChanged || !!passwordChanged);
-  }, [userProfile, passwordData, originalProfile]);
+  }, [userProfile, passwordData, originalProfile, isOAuthUser]);
 
-  // ===== 6. useCallback HOOKS =====
   const handleProfileChange = useCallback(
     (e) => {
       const { name, value } = e.target;
@@ -132,9 +157,10 @@ export default function SettingsContent() {
 
     try {
       const isChangingPassword =
-        passwordData.currentPassword ||
-        passwordData.newPassword ||
-        passwordData.confirmPassword;
+        !isOAuthUser &&
+        (passwordData.currentPassword ||
+          passwordData.newPassword ||
+          passwordData.confirmPassword);
 
       if (isChangingPassword) {
         if (!passwordData.currentPassword) {
@@ -228,9 +254,15 @@ export default function SettingsContent() {
     } finally {
       setIsSaving(false);
     }
-  }, [passwordData, userProfile, updateProfile, updatePassword, router]);
+  }, [
+    passwordData,
+    userProfile,
+    updateProfile,
+    updatePassword,
+    router,
+    isOAuthUser,
+  ]);
 
-  // ===== 7. CONDITIONAL RETURNS (AFTER all hooks) =====
   if (isLoading) {
     return <SettingsSkeleton />;
   }
@@ -251,7 +283,6 @@ export default function SettingsContent() {
     );
   }
 
-  // ===== 8. RENDER =====
   return (
     <>
       <MessageAlert message={message} onClose={clearMessage} />
@@ -267,10 +298,13 @@ export default function SettingsContent() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <SecurityCard
-            passwordData={passwordData}
-            onPasswordChange={handlePasswordChange}
-          />
+          {/* ✅ Only show SecurityCard if NOT OAuth user */}
+          {!isOAuthUser && (
+            <SecurityCard
+              passwordData={passwordData}
+              onPasswordChange={handlePasswordChange}
+            />
+          )}
 
           <PreferencesCard
             userProfile={userProfile}

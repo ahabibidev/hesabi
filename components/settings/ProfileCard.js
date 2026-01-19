@@ -29,6 +29,7 @@ const ProfileCard = memo(function ProfileCard({
               height={100}
               className="rounded-full border-4 border-white shadow-lg"
               priority
+              unoptimized={userProfile.avatar.startsWith("http")}
             />
           </div>
           <div className="text-center sm:text-left">

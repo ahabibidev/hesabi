@@ -22,7 +22,7 @@ export default function UserProfile({
       <div className="flex items-center">
         {/* Avatar Container */}
         <div
-          className={`relative flex-shrink-0 transition-all duration-300 ease-in-out ${
+          className={`relative shrink-0 transition-all duration-300 ease-in-out ${
             isCollapsed ? "mx-auto" : "mr-4"
           }`}
         >
@@ -40,7 +40,7 @@ export default function UserProfile({
               unoptimized={avatar.startsWith("http")}
             />
           ) : (
-            <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-lg font-bold ring-2 ring-white/20 ring-offset-2 ring-offset-[#0E121A]">
+            <div className="w-12 h-12 bg-linear-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-lg font-bold ring-2 ring-white/20 ring-offset-2 ring-offset-[#0E121A]">
               {initials}
             </div>
           )}

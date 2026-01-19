@@ -16,10 +16,11 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
   const [editingPot, setEditingPot] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [deletingPotId, setDeletingPotId] = useState(null); // ✅ Track which pot is being deleted
 
   // Money modal state
   const [moneyModalOpen, setMoneyModalOpen] = useState(false);
-  const [moneyModalType, setMoneyModalType] = useState("add"); // "add" or "withdraw"
+  const [moneyModalType, setMoneyModalType] = useState("add");
   const [selectedPot, setSelectedPot] = useState(null);
 
   // Update pots when initialPots changes
@@ -42,8 +43,6 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
   }, []);
 
   // Handle confirm add money
-  // In PotsClientWrapper.jsx - Update handleConfirmAddMoney
-
   const handleConfirmAddMoney = useCallback(
     async (potId, amount) => {
       setIsLoading(true);
@@ -56,10 +55,8 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
           body: JSON.stringify({ amount: parseFloat(amount) }),
         });
 
-        // Get response as text first to debug
         const text = await response.text();
 
-        // Try to parse as JSON
         let data;
         try {
           data = text ? JSON.parse(text) : {};
@@ -72,7 +69,6 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
           throw new Error(data.error || "Failed to add money");
         }
 
-        // Update local state
         setPots((prev) =>
           prev.map((pot) =>
             pot.id === potId
@@ -118,7 +114,6 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
 
         const data = await response.json();
 
-        // Update local state
         setPots((prev) =>
           prev.map((pot) =>
             pot.id === potId ? { ...pot, saved: data.pot.saved_amount } : pot,
@@ -158,12 +153,12 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to create pot");
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to create pot");
         }
 
         const data = await response.json();
 
-        // Add to local state
         const potToAdd = {
           id: data.id,
           name: newPot.name,
@@ -172,6 +167,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
           saved: 0,
           color: newPot.color,
           progressColor: newPot.color,
+          icon: newPot.icon || "piggy-bank",
           createdAt: new Date().toISOString().split("T")[0],
         };
 
@@ -180,7 +176,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
         router.refresh();
       } catch (error) {
         console.error("Error creating pot:", error);
-        alert("Failed to create pot. Please try again.");
+        alert(error.message || "Failed to create pot. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -208,20 +204,25 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to update pot");
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to update pot");
         }
 
-        // Update local state
+        const data = await response.json();
+
         setPots((prev) =>
           prev.map((pot) =>
             pot.id === updatedPot.id
               ? {
                   ...pot,
-                  name: updatedPot.name,
-                  description: updatedPot.description || updatedPot.name,
-                  target: parseFloat(updatedPot.target),
-                  color: updatedPot.color,
-                  progressColor: updatedPot.color,
+                  name: data.pot.name,
+                  description: data.pot.description,
+                  target: data.pot.target_amount,
+                  saved: data.pot.saved_amount || pot.saved,
+                  color: data.pot.color,
+                  progressColor: data.pot.color,
+                  icon: data.pot.icon,
+                  deadline: data.pot.deadline,
                 }
               : pot,
           ),
@@ -232,7 +233,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
         router.refresh();
       } catch (error) {
         console.error("Error updating pot:", error);
-        alert("Failed to update pot. Please try again.");
+        alert(error.message || "Failed to update pot. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -240,12 +241,10 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
     [router],
   );
 
+  // ✅ Updated handleDeletePot
   const handleDeletePot = useCallback(
     async (potId) => {
-      if (!confirm("Are you sure you want to delete this pot?")) {
-        return;
-      }
-
+      setDeletingPotId(potId); // ✅ Set deleting state
       setIsLoading(true);
       try {
         const response = await fetch(`/api/pots/${potId}`, {
@@ -253,7 +252,8 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to delete pot");
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to delete pot");
         }
 
         setPots((prev) => prev.filter((pot) => pot.id !== potId));
@@ -261,9 +261,10 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
         router.refresh();
       } catch (error) {
         console.error("Error deleting pot:", error);
-        alert("Failed to delete pot. Please try again.");
+        alert(error.message || "Failed to delete pot. Please try again.");
       } finally {
         setIsLoading(false);
+        setDeletingPotId(null); // ✅ Clear deleting state
       }
     },
     [router],
@@ -343,6 +344,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
               onDelete={handleDeletePot}
               onAddMoney={() => handleAddMoney(pot)}
               onWithdraw={() => handleWithdraw(pot)}
+              isDeleting={deletingPotId === pot.id} // ✅ Pass deleting state
             />
           ))
         )}

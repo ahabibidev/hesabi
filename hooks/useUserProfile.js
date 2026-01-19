@@ -13,6 +13,8 @@ export function useUserProfile() {
     oauthAvatar: null, // Add this for OAuth avatar
     currency: "USD",
     theme: "light",
+    provider: null,
+    hasPassword: true,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,7 +28,11 @@ export function useUserProfile() {
       const response = await fetch("/api/user/profile");
       const data = await response.json();
 
-      console.log("Fetch profile response:", response.status, data);
+      console.log("=== FETCH PROFILE DEBUG ===");
+      console.log("Response status:", response.status);
+      console.log("Full response data:", data);
+      console.log("OAuth avatar from API:", data.user?.oauthAvatar);
+      console.log("===========================");
 
       if (!response.ok) {
         throw new Error(
@@ -42,6 +48,8 @@ export function useUserProfile() {
         oauthAvatar: data.user.oauthAvatar || null, // Add this
         currency: data.user.currency || "USD",
         theme: data.user.theme || "light",
+        provider: data.user.provider || null,
+        hasPassword: data.user.hasPassword !== false,
       });
     } catch (err) {
       setError(err.message);

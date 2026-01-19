@@ -26,7 +26,7 @@ const SaveSettingsCard = memo(function SaveSettingsCard({
             <button
               onClick={onReset}
               disabled={isSaving}
-              className="px-6 py-3 rounded-xl border border-text/20 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 rounded-xl border border-text/20 hover:bg-foreground hover:text-background  hover:border hover:border-text/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               type="button"
             >
               Reset
