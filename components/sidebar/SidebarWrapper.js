@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getUserById } from "@/lib/db";
 import { DEFAULT_AVATAR } from "@/lib/constants";
-import Sidebar from "./Sidebar.js";
+import Sidebar from "./Sidebar";
 
 // This is a SERVER component
 export default async function SidebarWrapper() {
