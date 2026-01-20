@@ -213,8 +213,8 @@ export function SignUpFormClient() {
       >
         {/* First Name and Last Name Row */}
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex flex-col gap-2 flex-1">
-            <label htmlFor="firstName" className="font-semibold">
+          <div className="flex flex-col gap-1 flex-1">
+            <label htmlFor="firstName" className="font-semibold text-xs">
               First Name
             </label>
             <input
@@ -224,13 +224,13 @@ export function SignUpFormClient() {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="Enter your First Name"
-              className="w-full rounded-sm border border-gray-300 p-2 focus:outline-primary/70"
+              className="w-full rounded-sm border border-gray-400 py-1 px-2 placeholder:text-xs focus:outline-primary/70"
               required
               disabled={loading}
             />
           </div>
-          <div className="flex flex-col gap-2 flex-1">
-            <label htmlFor="lastName" className="font-semibold">
+          <div className="flex flex-col gap-1 flex-1">
+            <label htmlFor="lastName" className="font-semibold text-xs">
               Last Name
             </label>
             <input
@@ -240,15 +240,15 @@ export function SignUpFormClient() {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Enter your Last Name"
-              className="w-full rounded-sm border border-gray-300 p-2 focus:outline-primary/70"
+              className="w-full rounded-sm border border-gray-400 py-1 px-2 placeholder:text-xs focus:outline-primary/70"
               required
               disabled={loading}
             />
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="font-semibold">
+        <div className="flex flex-col gap-1">
+          <label htmlFor="email" className="font-semibold text-xs">
             Email
           </label>
           <input
@@ -258,7 +258,7 @@ export function SignUpFormClient() {
             value={formData.email}
             onChange={handleChange}
             placeholder="Enter your Email"
-            className="w-full rounded-sm border border-gray-300 p-2 focus:outline-primary/70"
+            className="w-full rounded-sm border border-gray-400 py-1 px-2 placeholder:text-xs focus:outline-primary/70"
             required
             disabled={loading}
           />
@@ -288,14 +288,14 @@ export function SignUpFormClient() {
 
         {/* Terms and Conditions */}
         <div className="mt-3">
-          <label className="flex items-start gap-2">
+          <label className="flex  gap-2">
             <input
               type="checkbox"
-              className="w-4 h-4 mt-1"
+              className="w-3 h-3 self-center"
               required
               disabled={loading}
             />
-            <span className="text-sm text-gray-600">
+            <span className="text-xs text-gray-600">
               I agree to the{" "}
               <a href="/terms" className="text-primary hover:underline">
                 Terms of Service
@@ -425,7 +425,7 @@ export function LoginFormClient() {
       )}
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="email" className="font-semibold">
+        <label htmlFor="email" className="font-semibold text-xs">
           Email
         </label>
         <input
@@ -435,7 +435,7 @@ export function LoginFormClient() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter your Email"
-          className="md:min-w-100 w-85 rounded-sm border border-gray-300 p-2 focus:outline-primary/70"
+          className="md:min-w-100 w-85 rounded-sm border border-gray-400 py-1 px-2  placeholder:text-xs focus:outline-primary/70"
           required
           disabled={loading}
         />
@@ -453,12 +453,12 @@ export function LoginFormClient() {
       />
 
       <div className="flex items-center justify-between mt-3">
-        <label htmlFor="remember" className="flex items-center gap-2">
+        <label htmlFor="remember" className="flex items-center gap-2 text-xs">
           <input
             id="remember"
             name="remember"
             type="checkbox"
-            className="w-4 h-4"
+            className="w-3 h-3"
             disabled={loading}
           />
           <span>Remember me</span>
@@ -466,7 +466,7 @@ export function LoginFormClient() {
 
         <a
           href="/forgot-password"
-          className="text-primary text-sm hover:underline"
+          className="text-primary text-xs hover:underline"
         >
           Forgot password?
         </a>

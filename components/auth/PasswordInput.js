@@ -14,18 +14,18 @@ export default function PasswordInput({
   const [show, setShow] = useState(false);
 
   return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="font-semibold">
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="font-semibold text-xs">
         {label}
       </label>
 
-      <div className="flex items-center  rounded-sm overflow-hidden">
+      <div className="flex items-center  overflow-hidden">
         <input
           id={id}
           name={name}
           type={show ? "text" : "password"}
           placeholder={placeholder}
-          className="flex-1 p-2 border border-r-transparent border-gray-300 focus:outline-primary/70 "
+          className="flex-1 border py-1 px-2 rounded-l-sm placeholder:text-xs border-r-transparent border-gray-400 focus:outline-primary/70 "
           value={value}
           onChange={onChange}
         />
@@ -34,7 +34,7 @@ export default function PasswordInput({
           type="button"
           onClick={() => setShow(!show)}
           aria-label={show ? "Hide password" : "Show password"}
-          className="p-2 text-text cursor-pointer border border-gray-300"
+          className="p-2 text-text cursor-pointer rounded-r-sm py-1 px-2 border border-gray-400"
         >
           {show ? (
             <BiHide className="text-2xl" />

@@ -18,10 +18,10 @@ export default function HeroSection() {
 
       {/* Content */}
       <div className="relative z-10 flex w-full flex-col items-center justify-center gap-4">
-        <h2 className="text-5xl text-center font-semibold text-[#f8fafc] font-sans">
+        <h2 className="text-3xl text-center font-semibold text-[#f8fafc] font-sans">
           Know Where Your <br /> Money Goes.
         </h2>
-        <p className="text-[#f8fafc] text-center font-sans">
+        <p className="text-sm text-white/80 text-center font-sans">
           Your Wallet’s New Best Friend
         </p>
       </div>

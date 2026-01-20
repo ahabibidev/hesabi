@@ -85,29 +85,29 @@ export default function AuthFormLayout({
     <section className="flex bg-[#2A5BC0] md:bg-[#7596D8]">
       <div className="flex w-full min-h-screen items-center bg-background justify-center md:rounded-bl-[5vw] md:rounded-tr-none rounded-bl-[20vw] rounded-tr-[20vw]">
         <div className="flex w-3/4 min-h-screen flex-col items-center justify-center gap-5">
-          <div className="flex flex-col md:items-start items-center gap-2">
+          <div className="flex flex-col md:items-start items-center gap-1">
             <Image
-              className="mb-5"
+              className="mb-2"
               alt="Heasbi Logo"
-              width={200}
+              width={150}
               height={50}
               src={logoSrc}
               priority
             />
-            <h2 className="md:block hidden text-3xl font-bold text-foreground">
+            <h2 className="md:block hidden text-xl font-bold text-foreground">
               {title}
             </h2>
-            <p className="text-text">{subtitle}</p>
+            <p className="text-text text-xs">{subtitle}</p>
 
             <form
               onSubmit={onSubmit}
-              className="flex flex-col gap-5 mt-4 w-full max-w-md"
+              className="flex flex-col gap-4 mt-4 w-full max-w-md"
             >
               {children}
               <button
                 type="submit"
                 disabled={isDisabled}
-                className="cursor-pointer bg-primary p-3 rounded-md text-md font-semibold text-background hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer bg-primary p-2 rounded-md  text-sm font-semibold text-background hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {buttonText}
               </button>
@@ -115,7 +115,7 @@ export default function AuthFormLayout({
           </div>
 
           <div className="flex flex-col items-center gap-4 w-full max-w-md">
-            <p className="text-text">or</p>
+            <p className="text-text text-xs">or</p>
             <div className="flex gap-7">
               {/* Google Button */}
               <button
@@ -130,7 +130,7 @@ export default function AuthFormLayout({
                     <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : (
-                  <Image width={30} src={googleLogo} alt="google logo" />
+                  <Image width={25} src={googleLogo} alt="google logo" />
                 )}
               </button>
 
@@ -148,13 +148,13 @@ export default function AuthFormLayout({
                     <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : (
-                  <Image width={35} src={githubLogo} alt="github logo" />
+                  <Image width={25} src={githubLogo} alt="github logo" />
                 )}
               </button>
             </div>
           </div>
 
-          <p className="self-center text-text relative top-15">
+          <p className="self-center text-xs text-text relative top-5 ">
             {footerText}
             <Link
               href={footerLink}
