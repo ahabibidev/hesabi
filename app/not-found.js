@@ -26,7 +26,7 @@ export default function NotFound() {
         </p>
         <div className="space-y-4">
           <Link
-            href="/dashboard"
+            href="/"
             className="inline-block px-8 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors"
           >
             Go to Dashboard →

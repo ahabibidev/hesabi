@@ -15,6 +15,8 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import SidebarWrapper from "@/components/sidebar/SidebarWrapper";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({ children }) {
   const session = await getServerSession(authOptions);
 

@@ -10,70 +10,82 @@
  * See LICENSE file for full license text.
  */
 
-import Image from "next/image";
+import { redirect } from "next/navigation";
+import DashboardLayout from "./DashboardLayout";
+import StatCard from "@/components/dashboard/StatCard";
+import PotsSection from "@/components/dashboard/PotsSection";
+import TransactionsSection from "@/components/dashboard/TransactionsSection";
+import BudgetSection from "@/components/dashboard/BudgetSection";
+import RecurringBillsSection from "@/components/dashboard/RecurringBillsSection";
+import { getDashboardData } from "@/lib/dashboard";
+import { formatCurrency } from "@/lib/constants";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function DashboardPage() {
+  const data = await getDashboardData();
+
+  if (!data) {
+    redirect("/login");
+  }
+
+  const { user, summary } = data;
+  const currency = user?.currency || "USD";
+
   return (
-    <>
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-          <Image
-            className="dark:invert"
-            src="/next.svg"
-            alt="Next.js logo"
-            width={100}
-            height={20}
-            priority
-          />
-          <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-            <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-              To get started, edit the page.js file.
-            </h1>
-            <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-              Looking for a starting point or more instructions? Head over to{" "}
-              <a
-                href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                className="font-medium text-zinc-950 dark:text-zinc-50"
-              >
-                Templates
-              </a>{" "}
-              or the{" "}
-              <a
-                href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                className="font-medium text-zinc-950 dark:text-zinc-50"
-              >
-                Learning
-              </a>{" "}
-              center.
-            </p>
-          </div>
-          <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-            <a
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-              href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                className="dark:invert"
-                src="/vercel.svg"
-                alt="Vercel logomark"
-                width={16}
-                height={16}
-              />
-              Deploy Now
-            </a>
-            <a
-              className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-              href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Documentation
-            </a>
-          </div>
-        </main>
+    <DashboardLayout>
+      {/* Page Header */}
+      <div className="flex w-full items-center mb-6">
+        <h1 className="relative text-foreground text-4xl font-bold">
+          Overview
+        </h1>
       </div>
-    </>
+
+      {/* Stats Section */}
+      <div className="flex flex-col md:flex-row w-full gap-5 mt-10">
+        <StatCard
+          title="Current Balance"
+          value={formatCurrency(Math.max(0, summary.currentBalance), currency)}
+          variant="default"
+        />
+        <StatCard
+          title="Income"
+          value={formatCurrency(summary.currentMonth.income, currency)}
+          variant="gradient"
+        />
+        <StatCard
+          title="Expenses"
+          value={formatCurrency(summary.currentMonth.expenses, currency)}
+          variant="gradient"
+        />
+      </div>
+
+      {/* Main Content Area */}
+      <div className="h-full md:flex w-full gap-5">
+        {/* Left Column */}
+        <div className="flex w-full flex-col gap-5">
+          <PotsSection
+            potsData={summary.potsOverview}
+            totalSaved={formatCurrency(summary.totalSavings, currency)}
+            currency={currency}
+          />
+          <TransactionsSection
+            transactions={summary.recentTransactions}
+            currency={currency}
+            maxItems={5}
+          />
+        </div>
+
+        {/* Right Column */}
+        <div className="flex flex-col w-full md:w-3/4 mt-5 gap-5">
+          <BudgetSection budgets={summary.budgetOverview} currency={currency} />
+          <RecurringBillsSection
+            bills={summary.recurringBills}
+            billsSummary={summary.billsSummary}
+            currency={user.currency}
+          />
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }

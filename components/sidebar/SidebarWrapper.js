@@ -40,7 +40,6 @@ export default async function SidebarWrapper() {
   return <Sidebar userData={userData} />;
 }
 
-// ✅ Updated helper function to use both first and last name
 function getInitials(firstName, lastName) {
   if (!firstName) return "U";
 

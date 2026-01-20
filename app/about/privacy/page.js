@@ -10,7 +10,10 @@
  * See LICENSE file for full license text.
  */
 
-import DashboardLayout from "../../dashboard/DashboardLayout";
+import DashboardLayout from "../../DashboardLayout";
+
+export const dynamic = "force-dynamic";
+
 import PrivacyContent from "@/components/legal/PrivacyContent";
 
 export const metadata = {

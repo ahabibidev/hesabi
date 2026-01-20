@@ -12,6 +12,8 @@
 
 import PrivacyContent from "@/components/legal/PrivacyContent";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Privacy Policy | Hesabi",
   description: "Privacy Policy for Hesabi - Learn how we protect your data.",

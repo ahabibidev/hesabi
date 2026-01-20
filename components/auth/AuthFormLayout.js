@@ -70,7 +70,7 @@ export default function AuthFormLayout({
     try {
       setOauthLoading(provider);
       await signIn(provider, {
-        callbackUrl: "/dashboard",
+        callbackUrl: "/",
       });
     } catch (error) {
       console.error(`${provider} sign in error:`, error);

@@ -12,9 +12,11 @@
 
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import DashboardLayout from "../dashboard/DashboardLayout";
+import DashboardLayout from "../DashboardLayout";
 import TransactionsClientWrapper from "@/components/transactions/TransactionsClientWrapper";
 import { getTransactionsData } from "@/lib/transactions";
+
+export const dynamic = "force-dynamic";
 
 // Loading component
 function TransactionsLoading() {

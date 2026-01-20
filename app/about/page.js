@@ -10,8 +10,10 @@
  * See LICENSE file for full license text.
  */
 
-import DashboardLayout from "../dashboard/DashboardLayout";
+import DashboardLayout from "../DashboardLayout";
 import AboutContent from "@/components/about/AboutContent";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "About | Hesabi",

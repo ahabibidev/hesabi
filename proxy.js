@@ -37,7 +37,7 @@ export async function proxy(req) {
     });
 
     if (token) {
-      url.pathname = "/dashboard";
+      url.pathname = "/";
       return NextResponse.redirect(url);
     }
   }

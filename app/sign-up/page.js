@@ -13,6 +13,8 @@
 import HeroSection from "@/components/HeroSection";
 import { SignUpFormClient } from "@/components/auth/AuthFormClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Sign Up | Your App Name",
   description: "Create a new account",

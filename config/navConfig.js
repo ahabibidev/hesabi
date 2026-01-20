@@ -9,7 +9,7 @@ import {
 } from "react-icons/fi";
 
 export const mainNavItems = [
-  { name: "dashboard", label: "Dashboard", icon: FiHome, href: "/dashboard" },
+  { name: "dashboard", label: "Dashboard", icon: FiHome, href: "/" },
   {
     name: "transactions",
     label: "Transactions",

@@ -11,9 +11,11 @@
  */
 
 import { redirect } from "next/navigation";
-import DashboardLayout from "../dashboard/DashboardLayout";
+import DashboardLayout from "../DashboardLayout";
 import PotsClientWrapper from "@/components/pots/PotsClientWrapper";
 import { getPotsData } from "@/lib/pots";
+
+export const dynamic = "force-dynamic";
 
 export default async function PotsPage() {
   const data = await getPotsData();

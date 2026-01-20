@@ -11,9 +11,11 @@
  */
 
 import { redirect } from "next/navigation";
-import DashboardLayout from "../dashboard/DashboardLayout";
+import DashboardLayout from "../DashboardLayout";
 import BudgetsClientWrapper from "@/components/budgets/BudgetsClientWrapper";
 import { getBudgetsData } from "@/lib/budgets";
+
+export const dynamic = "force-dynamic";
 
 export default async function BudgetsPage() {
   const data = await getBudgetsData();

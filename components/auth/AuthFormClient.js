@@ -152,7 +152,7 @@ export function SignUpFormClient() {
       });
 
       // Redirect to dashboard
-      router.push("/dashboard");
+      router.push("/");
       router.refresh();
     } catch (error) {
       console.error("OTP verification failed:", error);
@@ -346,7 +346,7 @@ export function LoginFormClient() {
       switch (errorParam) {
         case "OAuthAccountNotLinked":
           setError(
-            "This email is already registered. Please sign in with your original method."
+            "This email is already registered. Please sign in with your original method.",
           );
           break;
         case "OAuthSignin":
@@ -396,7 +396,7 @@ export function LoginFormClient() {
         }
         setLoading(false);
       } else {
-        router.push("/dashboard");
+        router.push("/");
         router.refresh();
       }
     } catch (error) {

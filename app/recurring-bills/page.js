@@ -14,8 +14,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { getRecurringBills } from "@/lib/db";
-import DashboardLayout from "../dashboard/DashboardLayout";
+import DashboardLayout from "../DashboardLayout";
 import RecurringBillsClientWrapper from "@/components/recurring-bills/RecurringBillsClientWrapper";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Recurring Bills | Hesabi",

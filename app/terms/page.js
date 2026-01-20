@@ -12,6 +12,8 @@
 
 import TermsContent from "@/components/legal/TermsContent";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Terms of Service | Hesabi",
   description: "Terms of Service for using Hesabi.",
