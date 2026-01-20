@@ -35,14 +35,14 @@ export default async function DashboardPage() {
   return (
     <DashboardLayout>
       {/* Page Header */}
-      <div className="flex w-full items-center mb-6">
-        <h1 className="relative text-foreground text-4xl font-bold">
+      <div className="flex w-full items-center">
+        <h1 className="relative text-foreground text-2xl font-bold">
           Overview
         </h1>
       </div>
 
       {/* Stats Section */}
-      <div className="flex flex-col md:flex-row w-full gap-5 mt-10">
+      <div className="flex flex-col md:flex-row w-full gap-5 mt-5">
         <StatCard
           title="Current Balance"
           value={formatCurrency(Math.max(0, summary.currentBalance), currency)}

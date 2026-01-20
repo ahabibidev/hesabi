@@ -14,11 +14,11 @@ export default function BudgetSection({
   // Calculate totals for the chart
   const totalSpent = data.reduce(
     (sum, b) => sum + (b.spent || b.value || 0),
-    0
+    0,
   );
   const totalBudget = data.reduce(
     (sum, b) => sum + (b.max_amount || b.max || 0),
-    0
+    0,
   );
 
   // Prepare chart data
@@ -35,7 +35,7 @@ export default function BudgetSection({
   const hasNoBudgets = !budgets || budgets.length === 0;
 
   return (
-    <div className="flex flex-col text-foreground bg-background shadow-xl bg-brand-gradient border border-text/10 p-6 gap-5 rounded-2xl">
+    <div className="flex flex-col w-130 text-foreground bg-background shadow-xl bg-brand-gradient border border-text/10 p-6 gap-5 rounded-2xl">
       <SectionHeader title="Budget" linkHref="/budgets" />
 
       {hasNoBudgets ? (
@@ -43,8 +43,8 @@ export default function BudgetSection({
           <p>No budgets set. Create a budget to track your spending!</p>
         </div>
       ) : (
-        <div className="flex flex-col md:flex-row items-center justify-between gap-2">
-          <div className="w-85.5">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="flex-1">
             <BudgetChart
               data={chartData}
               totalSpent={totalSpent}
@@ -54,8 +54,8 @@ export default function BudgetSection({
           </div>
 
           {/* Budget Categories */}
-          <div className="md:flex md:flex-col grid grid-cols-2 grid-rows-2 gap-2 justify-center">
-            {data.map((item) => (
+          <div className="md:flex md:flex-col md:flex-1 grid grid-cols-2 grid-rows-2 ">
+            {data.slice(-3).map((item) => (
               <BudgetItem
                 key={item.id || item.name}
                 name={item.name}

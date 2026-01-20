@@ -29,11 +29,11 @@ export default function PotsSection({
       <div className="flex">
         <div className="flex w-full flex-col gap-5 md:flex-row justify-between">
           {/* Total Saved Card */}
-          <div className="flex md:w-xs gap-3 bg-accent/10 items-center p-5 rounded-2xl">
-            <BsPiggyBank className="text-5xl text-primary" />
-            <div className="flex flex-col">
+          <div className="flex  gap-3 bg-accent/10 items-center pl-3 pr-15 rounded-2xl">
+            <BsPiggyBank className="text-4xl text-primary" />
+            <div className="flex text-xs flex-col">
               <p>Total Saved</p>
-              <h3 className="text-foreground text-2xl font-semibold">
+              <h3 className="text-foreground text-[18px] font-semibold">
                 {totalSaved}
               </h3>
             </div>
@@ -41,7 +41,7 @@ export default function PotsSection({
 
           {/* Pots Grid */}
           {hasNoPots ? (
-            <div className="flex items-center justify-center flex-1 text-text/50">
+            <div className="flex items-center text-sm justify-center flex-1 text-text/50">
               <p>No savings pots yet. Create one to start saving!</p>
             </div>
           ) : (

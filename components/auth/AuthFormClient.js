@@ -224,7 +224,7 @@ export function SignUpFormClient() {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="Enter your First Name"
-              className="w-full rounded-sm border border-gray-400 py-1 px-2 placeholder:text-xs focus:outline-primary/70"
+              className="w-full text-sm rounded-sm border border-gray-400 py-1 px-2 placeholder:text-xs focus:outline-primary/70"
               required
               disabled={loading}
             />
@@ -240,7 +240,7 @@ export function SignUpFormClient() {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Enter your Last Name"
-              className="w-full rounded-sm border border-gray-400 py-1 px-2 placeholder:text-xs focus:outline-primary/70"
+              className="w-full text-sm rounded-sm border border-gray-400 py-1 px-2 placeholder:text-xs focus:outline-primary/70"
               required
               disabled={loading}
             />
@@ -258,7 +258,7 @@ export function SignUpFormClient() {
             value={formData.email}
             onChange={handleChange}
             placeholder="Enter your Email"
-            className="w-full rounded-sm border border-gray-400 py-1 px-2 placeholder:text-xs focus:outline-primary/70"
+            className="w-full text-sm rounded-sm border border-gray-400 py-1 px-2 placeholder:text-xs focus:outline-primary/70"
             required
             disabled={loading}
           />
@@ -435,7 +435,7 @@ export function LoginFormClient() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter your Email"
-          className="md:min-w-100 w-full rounded-sm border border-gray-400 py-1 px-2  placeholder:text-xs focus:outline-primary/70"
+          className="md:min-w-100 w-full rounded-sm border border-gray-400 py-1 px-2 text-sm placeholder:text-xs focus:outline-primary/70"
           required
           disabled={loading}
         />

@@ -33,14 +33,14 @@ export default function UserProfile({
             <Image
               src={avatar}
               alt={`${name}'s avatar`}
-              width={48}
-              height={48}
+              width={35}
+              height={35}
               className="rounded-full ring-2 ring-white/20 ring-offset-2 ring-offset-[#0E121A] transition-all duration-300"
               onError={() => setImageError(true)}
               unoptimized={avatar.startsWith("http")}
             />
           ) : (
-            <div className="w-12 h-12 bg-linear-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-lg font-bold ring-2 ring-white/20 ring-offset-2 ring-offset-[#0E121A]">
+            <div className="w-10 h-10 bg-linear-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-lg font-bold ring-2 ring-white/20 ring-offset-2 ring-offset-[#0E121A]">
               {initials}
             </div>
           )}
@@ -57,10 +57,10 @@ export default function UserProfile({
             isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100 flex-1"
           }`}
         >
-          <h3 className="font-semibold text-white truncate whitespace-nowrap">
+          <h3 className="font-semibold text-sm text-white truncate whitespace-nowrap">
             {name} {lastName}
           </h3>
-          <p className="text-white/50 text-sm truncate whitespace-nowrap">
+          <p className="text-white/50 text-xs truncate whitespace-nowrap">
             {email}
           </p>
         </div>

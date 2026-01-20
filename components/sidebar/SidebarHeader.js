@@ -13,7 +13,7 @@ export default function SidebarHeader({ isCollapsed, onToggle }) {
       >
         {/* Logo */}
         <div className="relative shrink-0">
-          <Image alt="Logo" width={170} height={50} src={darkLogo} />
+          <Image alt="Logo" width={130} height={50} src={darkLogo} />
 
           <div className="absolute inset-0 bg-primary/20 rounded-xl blur-xl -z-10" />
         </div>
@@ -24,7 +24,7 @@ export default function SidebarHeader({ isCollapsed, onToggle }) {
       {/* Toggle Button */}
       <button
         onClick={onToggle}
-        className={`p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-300 group shrink-0 ${
+        className={`p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-300 group shrink-0 ${
           isCollapsed ? "mx-auto" : ""
         }`}
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}

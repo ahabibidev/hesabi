@@ -8,7 +8,7 @@ export default function NavItem({ item, isActive, isCollapsed, onClick }) {
     <Link
       href={item.href}
       onClick={onClick}
-      className={`relative flex items-center rounded-xl p-3 transition-all duration-300 ease-in-out group ${
+      className={`relative flex items-center rounded-xl p-2 transition-all duration-300 ease-in-out group ${
         isActive
           ? "bg-linear-to-r from-primary to-primary/80 text-white shadow-lg shadow-primary/25"
           : "hover:bg-white/5 text-white/50 hover:text-white"
@@ -16,7 +16,7 @@ export default function NavItem({ item, isActive, isCollapsed, onClick }) {
     >
       {/* Active indicator bar */}
       <div
-        className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full transition-all duration-300 ${
+        className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-white rounded-r-full transition-all duration-300 ${
           isActive && !isCollapsed
             ? "opacity-100 scale-100"
             : "opacity-0 scale-0"
@@ -30,7 +30,7 @@ export default function NavItem({ item, isActive, isCollapsed, onClick }) {
         }`}
       >
         <Icon
-          className={`text-xl transition-colors duration-300 ${
+          className={`relative top-[1px] text-md transition-colors duration-300 ${
             isActive ? "text-white" : "text-white/50 group-hover:text-white"
           }`}
         />
@@ -39,10 +39,10 @@ export default function NavItem({ item, isActive, isCollapsed, onClick }) {
       {/* Label */}
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isCollapsed ? "w-0 opacity-0 ml-0" : "w-auto opacity-100 ml-3"
+          isCollapsed ? "w-0 opacity-0 ml-0" : "w-auto opacity-100 ml-2"
         }`}
       >
-        <span className="font-medium text-sm whitespace-nowrap">
+        <span className="font-medium text-xs whitespace-nowrap">
           {item.label}
         </span>
       </div>

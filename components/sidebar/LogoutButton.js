@@ -10,18 +10,18 @@ export default function LogoutButton({ isCollapsed }) {
   return (
     <button
       onClick={handleLogout}
-      className={`relative flex items-center w-full rounded-xl p-3 transition-all duration-200 group hover:bg-red-500/10 border border-transparent hover:border-red-500/20 ${
+      className={`relative flex items-center w-full rounded-xl p-2 transition-all duration-200 group hover:bg-red-500/10 border border-transparent hover:border-red-500/20 ${
         isCollapsed ? "justify-center" : ""
       }`}
     >
       {/* Icon */}
       <div className="flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-        <FiLogOut className="text-xl text-red-400 group-hover:text-red-300" />
+        <FiLogOut className="text-md h-5 text-red-400 group-hover:text-red-300" />
       </div>
 
       {/* Label */}
       {!isCollapsed && (
-        <span className="ml-3 font-medium text-sm text-red-400 group-hover:text-red-300">
+        <span className="ml-2 font-medium text-xs text-red-400 group-hover:text-red-300">
           Logout
         </span>
       )}

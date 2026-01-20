@@ -1,7 +1,7 @@
 // components/dashboard/StatCard.jsx
 export default function StatCard({ title, value, variant = "default" }) {
   const baseClasses =
-    "flex md:flex-1 flex-col h-35 p-5 gap-3 justify-center rounded-2xl";
+    "flex md:flex-1 flex-col h-25 p-5  justify-center rounded-2xl";
 
   const variantClasses = {
     default: "bg-foreground",
@@ -15,8 +15,8 @@ export default function StatCard({ title, value, variant = "default" }) {
 
   return (
     <div className={`${baseClasses} ${variantClasses[variant]}`}>
-      <p className={`text-md ${textColorClasses[variant]}`}>{title}</p>
-      <p className={`${textColorClasses[variant]} text-3xl font-semibold`}>
+      <p className={`text-sm ${textColorClasses[variant]}`}>{title}</p>
+      <p className={`${textColorClasses[variant]} text-2xl font-semibold`}>
         {value}
       </p>
     </div>

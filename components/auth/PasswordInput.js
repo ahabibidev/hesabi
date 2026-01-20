@@ -25,7 +25,7 @@ export default function PasswordInput({
           name={name}
           type={show ? "text" : "password"}
           placeholder={placeholder}
-          className="flex-1 border py-1 px-2 rounded-l-sm placeholder:text-xs border-r-transparent border-gray-400 focus:outline-primary/70 "
+          className="flex-1 border text-sm py-1 px-2 rounded-l-sm placeholder:text-xs border-r-transparent border-gray-400 focus:outline-primary/70 "
           value={value}
           onChange={onChange}
         />
@@ -34,7 +34,7 @@ export default function PasswordInput({
           type="button"
           onClick={() => setShow(!show)}
           aria-label={show ? "Hide password" : "Show password"}
-          className="p-2 text-text cursor-pointer rounded-r-sm py-1 px-2 border border-gray-400"
+          className="p-2 text-text  cursor-pointer rounded-r-sm py-0.5 px-2 border border-gray-400"
         >
           {show ? (
             <BiHide className="text-2xl" />

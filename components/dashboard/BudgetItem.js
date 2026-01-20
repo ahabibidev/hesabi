@@ -13,11 +13,11 @@ export default function BudgetItem({
   const formattedAmount = formatCurrency(spent, currency);
 
   return (
-    <div className="flex p-2 gap-3">
-      <div className="h-12.75 w-1 rounded-full" style={colorStyle}></div>
-      <p className="text-foreground/80 font-medium flex flex-col gap-1">
+    <div className="flex p-2 gap-3 ml-15">
+      <div className="h-9.75 w-1 rounded-full" style={colorStyle}></div>
+      <p className="text-foreground/80 text-xs font-medium flex flex-col gap-1">
         {name}
-        <span className="font-bold text-foreground">{formattedAmount}</span>
+        <span className="font-bold text-sm text-foreground">{formattedAmount}</span>
       </p>
     </div>
   );
