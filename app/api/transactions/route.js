@@ -55,10 +55,25 @@ export async function POST(request) {
     } = body;
 
     // Validation
-    if (!name || !amount || !type || !date) {
+    if (!name || amount === undefined || !type || !date) {
       return NextResponse.json(
         { error: "Name, amount, type, and date are required" },
         { status: 400 }
+      );
+    }
+
+    const parsedAmount = parseFloat(amount);
+    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+      return NextResponse.json(
+        { error: "Amount must be a number greater than 0" },
+        { status: 400 },
+      );
+    }
+
+    if (Number.isNaN(new Date(date).getTime())) {
+      return NextResponse.json(
+        { error: "Date must be a valid ISO date string" },
+        { status: 400 },
       );
     }
 
@@ -69,11 +84,11 @@ export async function POST(request) {
       );
     }
 
-    const id = createTransaction(session.user.id, {
+    const id = await createTransaction(session.user.id, {
       categoryId,
       name,
       description,
-      amount: parseFloat(amount),
+      amount: parsedAmount,
       type,
       date,
       recurring,

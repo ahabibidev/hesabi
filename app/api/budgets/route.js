@@ -36,17 +36,50 @@ export async function POST(request) {
     const { categoryId, name, maxAmount, color, period, startDate, endDate } =
       body;
 
-    if (!name || !maxAmount) {
+    if (!name || maxAmount === undefined) {
       return NextResponse.json(
         { error: "Name and max amount are required" },
         { status: 400 }
       );
     }
 
+    const parsedMaxAmount = parseFloat(maxAmount);
+    if (Number.isNaN(parsedMaxAmount) || parsedMaxAmount <= 0) {
+      return NextResponse.json(
+        { error: "Max amount must be a number greater than 0" },
+        { status: 400 },
+      );
+    }
+
+    if (startDate && Number.isNaN(new Date(startDate).getTime())) {
+      return NextResponse.json(
+        { error: "startDate must be a valid date" },
+        { status: 400 },
+      );
+    }
+
+    if (endDate && Number.isNaN(new Date(endDate).getTime())) {
+      return NextResponse.json(
+        { error: "endDate must be a valid date" },
+        { status: 400 },
+      );
+    }
+
+    if (
+      startDate &&
+      endDate &&
+      new Date(startDate).getTime() > new Date(endDate).getTime()
+    ) {
+      return NextResponse.json(
+        { error: "startDate cannot be after endDate" },
+        { status: 400 },
+      );
+    }
+
     const id = await createBudget(session.user.id, {
       categoryId,
       name,
-      maxAmount: parseFloat(maxAmount),
+      maxAmount: parsedMaxAmount,
       color,
       period,
       startDate,

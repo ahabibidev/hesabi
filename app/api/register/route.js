@@ -1,7 +1,6 @@
 // app/api/register/route.js
 import { NextResponse } from "next/server";
 import {
-  getUserByEmail,
   createOTP,
   checkOTPRateLimit,
   incrementOTPRequestCount,
@@ -38,17 +37,19 @@ export async function POST(request) {
       );
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Check if user already exists (using async function)
     const existingUser = await queryOne(
       "SELECT id, email_verified FROM users WHERE email = ?",
-      [email]
+      [normalizedEmail]
     );
 
     if (existingUser) {
       // If user exists but not verified, allow re-registration
       if (existingUser.email_verified === 0) {
         // Check rate limit before sending OTP
-        const rateLimit = await checkOTPRateLimit(email);
+        const rateLimit = await checkOTPRateLimit(normalizedEmail);
 
         if (!rateLimit.allowed) {
           const waitMessage = rateLimit.blocked
@@ -80,10 +81,10 @@ export async function POST(request) {
         );
 
         // Generate and send OTP
-        const otp = await createOTP(email);
-        await incrementOTPRequestCount(email);
+        const otp = await createOTP(normalizedEmail);
+        await incrementOTPRequestCount(normalizedEmail);
 
-        const emailResult = await sendOTPEmail(email, otp, name);
+        const emailResult = await sendOTPEmail(normalizedEmail, otp, name);
 
         if (!emailResult.success) {
           console.error("Failed to send OTP email:", emailResult.error);
@@ -111,7 +112,7 @@ export async function POST(request) {
     }
 
     // Check rate limit before sending OTP
-    const rateLimit = await checkOTPRateLimit(email);
+    const rateLimit = await checkOTPRateLimit(normalizedEmail);
 
     if (!rateLimit.allowed) {
       const waitMessage = rateLimit.blocked
@@ -137,16 +138,16 @@ export async function POST(request) {
     const result = await execute(
       `INSERT INTO users (email, password, name, last_name, provider, email_verified) 
        VALUES (?, ?, ?, ?, 'credentials', 0)`,
-      [email, hashedPassword, name.trim(), lastName?.trim() || null]
+      [normalizedEmail, hashedPassword, name.trim(), lastName?.trim() || null]
     );
 
     const userId = result.lastInsertRowid;
 
     // Generate and send OTP
-    const otp = await createOTP(email);
-    await incrementOTPRequestCount(email);
+    const otp = await createOTP(normalizedEmail);
+    await incrementOTPRequestCount(normalizedEmail);
 
-    const emailResult = await sendOTPEmail(email, otp, name);
+    const emailResult = await sendOTPEmail(normalizedEmail, otp, name);
 
     if (!emailResult.success) {
       // Delete the user if email fails

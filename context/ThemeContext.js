@@ -16,8 +16,6 @@ export function ThemeProvider({ children }) {
 
   // ✅ Function to update favicon based on theme
   const updateFavicon = (currentTheme) => {
-    console.log("🎨 Updating favicon for theme:", currentTheme);
-
     const favicon = document.querySelector("link[rel='icon']");
     const faviconPath =
       currentTheme === "light" ? "/favicon-light.ico" : "/favicon-dark.ico";

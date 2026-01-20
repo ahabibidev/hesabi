@@ -37,12 +37,6 @@ export default function AuthFormLayout({
       // Also check data-theme attribute as fallback
       const dataTheme = htmlElement.getAttribute("data-theme");
 
-      console.log("Theme check:", {
-        isDarkMode,
-        dataTheme,
-        classes: htmlElement.className,
-      });
-
       setIsDark(isDarkMode || dataTheme === "dark");
     };
 

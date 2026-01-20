@@ -17,7 +17,13 @@ export async function GET(request, { params }) {
     }
 
     const { id } = await params;
-    const transaction = await getTransactionById(parseInt(id), session.user.id);
+    const transactionId = Number(id);
+
+    if (!Number.isFinite(transactionId)) {
+      return NextResponse.json({ error: "Invalid transaction id" }, { status: 400 });
+    }
+
+    const transaction = await getTransactionById(transactionId, session.user.id);
 
     if (!transaction) {
       return NextResponse.json(
@@ -45,11 +51,17 @@ export async function PATCH(request, { params }) {
     }
 
     const { id } = await params;
+    const transactionId = Number(id);
+
+    if (!Number.isFinite(transactionId)) {
+      return NextResponse.json({ error: "Invalid transaction id" }, { status: 400 });
+    }
+
     const body = await request.json();
 
-    const result = await updateTransaction(parseInt(id), session.user.id, body);
+    const updated = await updateTransaction(transactionId, session.user.id, body);
 
-    if (result.rowsAffected === 0) {
+    if (!updated) {
       return NextResponse.json(
         { error: "Transaction not found or not updated" },
         { status: 404 }
@@ -75,9 +87,15 @@ export async function DELETE(request, { params }) {
     }
 
     const { id } = await params;
-    const result = await deleteTransaction(parseInt(id), session.user.id);
+    const transactionId = Number(id);
 
-    if (result.rowsAffected === 0) {
+    if (!Number.isFinite(transactionId)) {
+      return NextResponse.json({ error: "Invalid transaction id" }, { status: 400 });
+    }
+
+    const deleted = await deleteTransaction(transactionId, session.user.id);
+
+    if (!deleted) {
       return NextResponse.json(
         { error: "Transaction not found" },
         { status: 404 }

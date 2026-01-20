@@ -62,9 +62,8 @@ export const authOptions = {
           throw new Error("Please enter an email and password");
         }
 
-        const user = await queryOne("SELECT * FROM users WHERE email = ?", [
-          credentials.email,
-        ]);
+        const email = credentials.email.toLowerCase().trim();
+        const user = await queryOne("SELECT * FROM users WHERE email = ?", [email]);
 
         if (!user) {
           throw new Error("No user found with this email");

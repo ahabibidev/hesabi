@@ -25,11 +25,6 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    console.log("=== DB USER DATA ===");
-    console.log("avatar:", user.avatar);
-    console.log("oauth_avatar:", user.oauth_avatar);
-    console.log("===================");
-
     return NextResponse.json({
       user: {
         id: user.id,

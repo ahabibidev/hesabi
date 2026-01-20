@@ -14,7 +14,13 @@ export async function GET(request, { params }) {
     }
 
     const { id } = await params;
-    const pot = await getPotById(parseInt(id), session.user.id);
+    const potId = Number(id);
+
+    if (!Number.isFinite(potId)) {
+      return NextResponse.json({ error: "Invalid pot id" }, { status: 400 });
+    }
+
+    const pot = await getPotById(potId, session.user.id);
 
     if (!pot) {
       return NextResponse.json({ error: "Pot not found" }, { status: 404 });
@@ -40,6 +46,12 @@ export async function PATCH(request, { params }) {
     }
 
     const { id } = await params;
+    const potId = Number(id);
+
+    if (!Number.isFinite(potId)) {
+      return NextResponse.json({ error: "Invalid pot id" }, { status: 400 });
+    }
+
     const body = await request.json();
 
     // Validate required fields
@@ -58,7 +70,7 @@ export async function PATCH(request, { params }) {
     }
 
     // Check if pot exists
-    const existingPot = await getPotById(parseInt(id), session.user.id);
+    const existingPot = await getPotById(potId, session.user.id);
 
     if (!existingPot) {
       return NextResponse.json({ error: "Pot not found" }, { status: 404 });
@@ -75,7 +87,7 @@ export async function PATCH(request, { params }) {
     };
 
     // Update the pot
-    const updated = await updatePot(parseInt(id), session.user.id, updateData);
+    const updated = await updatePot(potId, session.user.id, updateData);
 
     if (!updated) {
       return NextResponse.json(
@@ -85,7 +97,7 @@ export async function PATCH(request, { params }) {
     }
 
     // Get updated pot
-    const updatedPot = await getPotById(parseInt(id), session.user.id);
+    const updatedPot = await getPotById(potId, session.user.id);
 
     return NextResponse.json({
       message: "Pot updated successfully",
@@ -110,15 +122,20 @@ export async function DELETE(request, { params }) {
     }
 
     const { id } = await params;
+    const potId = Number(id);
+
+    if (!Number.isFinite(potId)) {
+      return NextResponse.json({ error: "Invalid pot id" }, { status: 400 });
+    }
 
     // Check if pot exists
-    const existingPot = await getPotById(parseInt(id), session.user.id);
+    const existingPot = await getPotById(potId, session.user.id);
 
     if (!existingPot) {
       return NextResponse.json({ error: "Pot not found" }, { status: 404 });
     }
 
-    const deleted = await deletePot(parseInt(id), session.user.id);
+    const deleted = await deletePot(potId, session.user.id);
 
     if (!deleted) {
       return NextResponse.json(

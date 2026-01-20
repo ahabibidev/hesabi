@@ -4,6 +4,18 @@
 import { useState, useEffect, useCallback } from "react";
 import { DEFAULT_AVATAR } from "@/lib/constants";
 
+/**
+ * Custom hook to manage authenticated user profile state and mutations.
+ * Handles fetching, updating profile data, and password changes.
+ * @returns {Object} Hook state and methods.
+ * @property {Object} userProfile - Current user profile data.
+ * @property {Function} setUserProfile - Function to update profile state.
+ * @property {boolean} isLoading - Whether profile is being fetched.
+ * @property {string|null} error - Error message if fetch/update failed.
+ * @property {Function} fetchProfile - Refetch user profile from server.
+ * @property {Function} updateProfile - Update user profile on server.
+ * @property {Function} updatePassword - Change user password.
+ */
 export function useUserProfile() {
   const [userProfile, setUserProfile] = useState({
     firstName: "",
@@ -20,19 +32,13 @@ export function useUserProfile() {
   const [error, setError] = useState(null);
 
   // Fetch user profile
-  const fetchProfile = useCallback(async () => {
+  const fetchProfile = useCallback(async (signal) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch("/api/user/profile");
+      const response = await fetch("/api/user/profile", { signal });
       const data = await response.json();
-
-      console.log("=== FETCH PROFILE DEBUG ===");
-      console.log("Response status:", response.status);
-      console.log("Full response data:", data);
-      console.log("OAuth avatar from API:", data.user?.oauthAvatar);
-      console.log("===========================");
 
       if (!response.ok) {
         throw new Error(
@@ -52,18 +58,19 @@ export function useUserProfile() {
         hasPassword: data.user.hasPassword !== false,
       });
     } catch (err) {
+      if (err.name === "AbortError") return;
       setError(err.message);
       console.error("Error fetching profile:", err);
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
   // Update user profile
   const updateProfile = useCallback(async (updates) => {
     try {
-      console.log("Updating profile with:", updates);
-
       const response = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: {
@@ -73,7 +80,6 @@ export function useUserProfile() {
       });
 
       const data = await response.json();
-      console.log("Update profile response:", response.status, data);
 
       if (!response.ok) {
         throw new Error(
@@ -102,8 +108,6 @@ export function useUserProfile() {
   // Update password
   const updatePassword = useCallback(async (passwordData) => {
     try {
-      console.log("Updating password...");
-
       const response = await fetch("/api/user/password", {
         method: "PATCH",
         headers: {
@@ -113,7 +117,6 @@ export function useUserProfile() {
       });
 
       const data = await response.json();
-      console.log("Update password response:", response.status, data);
 
       if (!response.ok) {
         throw new Error(
@@ -129,7 +132,9 @@ export function useUserProfile() {
   }, []);
 
   useEffect(() => {
-    fetchProfile();
+    const controller = new AbortController();
+    fetchProfile(controller.signal);
+    return () => controller.abort();
   }, [fetchProfile]);
 
   return {

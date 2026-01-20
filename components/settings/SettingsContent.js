@@ -46,17 +46,6 @@ export default function SettingsContent() {
     // Also check provider field if available
     const hasProvider = userProfile.provider && userProfile.provider !== null;
 
-    // Debug in BROWSER console (F12)
-    console.log("=== OAUTH CHECK ===");
-    console.log("avatar:", avatar);
-    console.log("oauthAvatar:", oauthAvatar);
-    console.log("provider:", userProfile.provider);
-    console.log("hasPassword:", userProfile.hasPassword);
-    console.log("isExternalAvatar:", isExternalAvatar);
-    console.log("hasProvider:", hasProvider);
-    console.log("Final isOAuthUser:", isExternalAvatar || hasProvider);
-    console.log("==================");
-
     return isExternalAvatar || hasProvider;
   }, [
     userProfile.avatar,

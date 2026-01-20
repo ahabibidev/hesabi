@@ -13,6 +13,12 @@ export async function POST(request, { params }) {
     }
 
     const { id } = await params;
+    const potId = Number(id);
+
+    if (!Number.isFinite(potId)) {
+      return NextResponse.json({ error: "Invalid pot id" }, { status: 400 });
+    }
+
     const body = await request.json();
     const { amount, note } = body;
 
@@ -25,7 +31,7 @@ export async function POST(request, { params }) {
     }
 
     // Check if pot exists
-    const existingPot = await getPotById(parseInt(id), session.user.id);
+    const existingPot = await getPotById(potId, session.user.id);
 
     if (!existingPot) {
       return NextResponse.json({ error: "Pot not found" }, { status: 404 });
@@ -33,7 +39,7 @@ export async function POST(request, { params }) {
 
     // Add money to pot
     const updatedPot = await addToPot(
-      parseInt(id),
+      potId,
       session.user.id,
       parseFloat(amount),
       note || null,

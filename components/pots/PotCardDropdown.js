@@ -16,7 +16,7 @@ export default function PotCardDropdown({
           e.stopPropagation();
           onToggle(potId);
         }}
-        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        className="p-2 rounded-lg hover:bg-foreground hover:text-background transition-colors"
         aria-label="Pot options"
       >
         <BiDotsHorizontalRounded className="text-2xl md:text-3xl" />
@@ -29,7 +29,7 @@ export default function PotCardDropdown({
               e.stopPropagation();
               onEdit();
             }}
-            className="w-full px-4 py-3 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+            className="w-full px-4 py-3 text-left text-sm hover:bg-foreground hover:text-background transition-colors flex items-center gap-2"
           >
             <svg
               className="w-4 h-4"
