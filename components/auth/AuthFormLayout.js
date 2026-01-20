@@ -4,10 +4,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import googleLogo from "@/public/google.svg";
-import facebookLogo from "@/public/facebook.svg";
 import githubLogo from "@/public/github.svg";
+import darkLogo from "@/public/dark-logo.png";
+import lightLogo from "@/public/light-logo.png";
 
 export default function AuthFormLayout({
   title,
@@ -21,6 +22,55 @@ export default function AuthFormLayout({
   disabled = false,
 }) {
   const [oauthLoading, setOauthLoading] = useState(null);
+  const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+
+    // Function to check theme
+    const checkTheme = () => {
+      // Check if 'dark' class exists on html element
+      const htmlElement = document.documentElement;
+      const isDarkMode = htmlElement.classList.contains("dark");
+
+      // Also check data-theme attribute as fallback
+      const dataTheme = htmlElement.getAttribute("data-theme");
+
+      console.log("Theme check:", {
+        isDarkMode,
+        dataTheme,
+        classes: htmlElement.className,
+      });
+
+      setIsDark(isDarkMode || dataTheme === "dark");
+    };
+
+    // Initial check
+    checkTheme();
+
+    // Watch for theme changes
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Select logo based on theme
+  const logoSrc = isDark ? darkLogo : lightLogo;
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="bg-brand-gradient border border-text/10 rounded-2xl p-8 text-center h-48" />
+        <div className="bg-brand-gradient border border-text/10 rounded-2xl p-6 md:p-8 h-96" />
+      </div>
+    );
+  }
 
   const handleOAuthSignIn = async (provider) => {
     try {
@@ -38,11 +88,18 @@ export default function AuthFormLayout({
   const isDisabled = disabled || oauthLoading !== null;
 
   return (
-    <section className="flex bg-[#2A5BC0]">
+    <section className="flex bg-[#2A5BC0] md:bg-[#6D99F2]">
       <div className="flex w-full min-h-screen items-center bg-background justify-center md:rounded-bl-[5vw] md:rounded-tr-none rounded-bl-[20vw] rounded-tr-[20vw]">
         <div className="flex w-3/4 min-h-screen flex-col items-center justify-center gap-5">
           <div className="flex flex-col md:items-start items-center gap-2">
-            <h1 className="mb-5 text-4xl font-bold text-primary">Logo</h1>
+            <Image
+              className="mb-5"
+              alt="Hesaby Logo"
+              width={200}
+              height={50}
+              src={logoSrc}
+              priority
+            />
             <h2 className="md:block hidden text-3xl font-bold text-foreground">
               {title}
             </h2>

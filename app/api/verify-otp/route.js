@@ -9,24 +9,29 @@ export async function POST(request) {
     if (!email || !otp) {
       return NextResponse.json(
         { error: "Email and OTP are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    if (!/^\d{6}$/.test(otp)) {
+    // Normalize inputs
+    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedOTP = otp.trim();
+
+    // Validate OTP format
+    if (!/^\d{6}$/.test(normalizedOTP)) {
       return NextResponse.json(
         { error: "OTP must be 6 digits" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // Verify OTP (async)
-    const result = await verifyOTP(email, otp);
+    // Verify OTP
+    const result = await verifyOTP(normalizedEmail, normalizedOTP);
 
     if (!result.valid) {
       return NextResponse.json(
         { error: result.reason || "Invalid or expired OTP" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -34,10 +39,11 @@ export async function POST(request) {
     if (userId) {
       await markEmailVerified(userId);
     } else {
-      // Find user by email and verify (async)
-      const user = await queryOne("SELECT id FROM users WHERE email = ?", [
-        email,
-      ]);
+      // Find user by email and verify
+      const user = await queryOne(
+        "SELECT id FROM users WHERE LOWER(email) = ?",
+        [normalizedEmail],
+      );
 
       if (user) {
         await markEmailVerified(user.id);
@@ -52,7 +58,7 @@ export async function POST(request) {
     console.error("OTP verification error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

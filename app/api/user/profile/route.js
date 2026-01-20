@@ -13,7 +13,6 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ✅ Add oauth_avatar to SELECT
     const user = await queryOne(
       `SELECT 
         id, email, name, last_name, avatar, oauth_avatar, currency, theme, created_at 
@@ -26,7 +25,6 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // ✅ Add debug logging
     console.log("=== DB USER DATA ===");
     console.log("avatar:", user.avatar);
     console.log("oauth_avatar:", user.oauth_avatar);
@@ -39,7 +37,7 @@ export async function GET() {
         firstName: user.name || "",
         lastName: user.last_name || "",
         avatar: user.avatar || "/avatars/user.png",
-        oauthAvatar: user.oauth_avatar || null, // ✅ Add this
+        oauthAvatar: user.oauth_avatar || null,
         currency: user.currency || "USD",
         theme: user.theme || "light",
         createdAt: user.created_at,
