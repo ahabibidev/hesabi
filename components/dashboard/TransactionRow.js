@@ -37,7 +37,7 @@ export default function TransactionRow({
 
   return (
     <div
-      className={`flex justify-between pb-3 ${
+      className={`flex justify-between pb-2 ${
         showBorder ? "border-b border-text/30" : ""
       }`}
     >

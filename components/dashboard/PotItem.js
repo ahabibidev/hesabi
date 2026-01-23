@@ -9,9 +9,9 @@ export default function PotItem({ name, amount, color, colorHex }) {
         className={`h-9.75 w-1 rounded-full ${!colorHex ? color : ""}`}
         style={colorStyle}
       ></div>
-      <p className="text-foreground/80 text-xs font-medium flex flex-col gap-1">
+      <p className="text-foreground/80 text-sm font-medium flex flex-col gap-1">
         {name}
-        <span className="font-bold text-md text-foreground">{amount}</span>
+        <span className="font-bold text-sm text-foreground">{amount}</span>
       </p>
     </div>
   );

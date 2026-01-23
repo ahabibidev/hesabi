@@ -31,7 +31,7 @@ export default function PotsSection({
           {/* Total Saved Card */}
           <div className="flex  gap-3 bg-accent/10 items-center pl-3 pr-15 rounded-2xl">
             <BsPiggyBank className="text-4xl text-primary" />
-            <div className="flex text-xs flex-col">
+            <div className="flex text-sm flex-col">
               <p>Total Saved</p>
               <h3 className="text-foreground text-[18px] font-semibold">
                 {totalSaved}

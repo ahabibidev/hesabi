@@ -48,8 +48,8 @@ export default function BudgetChart({
     <div
       style={{
         width: "100%",
-        maxWidth: "250px",
-        height: "250px",
+        maxWidth: "200px",
+        height: "200px",
         margin: "0 auto",
       }}
     >
@@ -77,7 +77,7 @@ export default function BudgetChart({
             <tspan
               x="50%"
               dy="-0.3em"
-              fontSize="30"
+              fontSize="26"
               fontWeight="700"
               style={{ fill: "var(--color-foreground)" }}
             >

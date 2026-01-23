@@ -11,7 +11,7 @@ export default function TransactionsSection({
   const hasNoTransactions = !transactions || transactions.length === 0;
 
   return (
-    <div className="flex w-full flex-col h-full bg-background shadow-xl bg-brand-gradient border border-text/10 p-6 gap-5 rounded-2xl">
+    <div className="flex w-full flex-col h-full bg-background shadow-xl bg-brand-gradient border border-text/10 p-6 gap-3 rounded-2xl">
       <SectionHeader title="Transactions" linkHref="/transactions" />
 
       {hasNoTransactions ? (
