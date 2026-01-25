@@ -83,13 +83,13 @@ export default function AuthFormLayout({
 
   return (
     <section className="flex bg-[#2A5BC0] md:bg-[#7596D8]">
-      <div className="flex w-full min-h-screen items-center bg-background justify-center md:rounded-bl-[5vw] md:rounded-tr-none rounded-bl-[20vw] rounded-tr-[20vw]">
+      <div className="relative flex w-full min-h-screen items-center bg-background justify-center md:rounded-bl-[5vw] md:rounded-tr-none rounded-bl-[20vw] rounded-tr-[20vw]">
         <div className="flex w-3/4 min-h-screen flex-col items-center justify-center gap-5">
           <div className="flex flex-col md:items-start items-center gap-2">
             <Image
               className="mb-5"
               alt="Heasbi Logo"
-              width={200}
+              width={160}
               height={50}
               src={logoSrc}
               priority
@@ -155,7 +155,7 @@ export default function AuthFormLayout({
           </div>
 
           <p className="self-center text-text relative top-5">
-            {footerText}
+            {footerText}{" "}
             <Link
               href={footerLink}
               className="cursor-pointer font-semibold text-primary underline hover:text-primary/80 transition-colors"
@@ -164,6 +164,27 @@ export default function AuthFormLayout({
             </Link>
           </p>
         </div>
+
+        {/* --- SUBTLE LEGAL FOOTER FOR GOOGLE VERIFICATION --- */}
+
+        {footerLinkText === "Sign Up" && (
+          <footer className="absolute bottom-6 flex gap-6 opacity-30 hover:opacity-100 transition-opacity">
+            <Link
+              href="/privacy"
+              className="text-[10px] uppercase tracking-widest text-text hover:underline"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms"
+              className="text-[10px] uppercase tracking-widest text-text hover:underline"
+            >
+              Terms of Service
+            </Link>
+          </footer>
+        )}
+
+        {/* -------------------------------------------------- */}
       </div>
     </section>
   );

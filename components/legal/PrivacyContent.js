@@ -217,7 +217,6 @@ const PRIVACY_SECTIONS = [
       "Hesabi's use and transfer to any other app of information received from Google APIs will adhere to Google API Services User Data Policy, including the Limited Use requirements.",
     ],
     note: "We only request access to your basic profile information and email address to provide a secure login experience.",
-    highlighted: true, // Make this stand out for the Google reviewer
   },
 ];
 
@@ -398,7 +397,7 @@ export default function PrivacyContent() {
           <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
             <Mail className="w-5 h-5 text-primary" />
           </div>
-          10. Contact Us
+          11. Contact Us
         </h2>
         <p className="text-text/70 leading-relaxed mb-4">
           If you have any questions or concerns about this Privacy Policy or our

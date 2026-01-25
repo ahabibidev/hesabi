@@ -7,6 +7,7 @@ import { signIn } from "next-auth/react";
 import AuthFormLayout from "./AuthFormLayout";
 import PasswordInput from "./PasswordInput";
 import OTPModal from "./OTPModal";
+import Link from "next/link";
 
 export function SignUpFormClient() {
   const [formData, setFormData] = useState({
@@ -459,27 +460,6 @@ export function LoginFormClient() {
         >
           Forgot password?
         </a>
-      </div>
-      {/* Terms and Conditions */}
-      <div className="mt-3">
-        <label className="flex items-start gap-2">
-          <input
-            type="checkbox"
-            className="w-4 h-4 mt-1"
-            required
-            disabled={loading}
-          />
-          <span className="text-sm text-gray-600">
-            I agree to the{" "}
-            <a href="/terms" className="text-primary hover:underline">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="/privacy" className="text-primary hover:underline">
-              Privacy Policy
-            </a>
-          </span>
-        </label>
       </div>
 
       {error && <div className="text-red-500 text-sm text-center">{error}</div>}
