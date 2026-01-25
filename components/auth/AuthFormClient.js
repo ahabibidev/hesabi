@@ -452,24 +452,34 @@ export function LoginFormClient() {
         disabled={loading}
       />
 
-      <div className="flex items-center justify-between mt-3">
-        <label htmlFor="remember" className="flex items-center gap-2">
-          <input
-            id="remember"
-            name="remember"
-            type="checkbox"
-            className="w-4 h-4"
-            disabled={loading}
-          />
-          <span>Remember me</span>
-        </label>
-
+      <div className="flex items-center justify-end">
         <a
           href="/forgot-password"
-          className="text-primary text-sm hover:underline"
+          className="text-primary  text-sm hover:underline"
         >
           Forgot password?
         </a>
+      </div>
+      {/* Terms and Conditions */}
+      <div className="mt-3">
+        <label className="flex items-start gap-2">
+          <input
+            type="checkbox"
+            className="w-4 h-4 mt-1"
+            required
+            disabled={loading}
+          />
+          <span className="text-sm text-gray-600">
+            I agree to the{" "}
+            <a href="/terms" className="text-primary hover:underline">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="/privacy" className="text-primary hover:underline">
+              Privacy Policy
+            </a>
+          </span>
+        </label>
       </div>
 
       {error && <div className="text-red-500 text-sm text-center">{error}</div>}
