@@ -209,6 +209,16 @@ const PRIVACY_SECTIONS = [
       "We encourage you to review this Privacy Policy periodically to stay informed about how we are protecting your information.",
     ],
   },
+  {
+    id: "google-data",
+    icon: Shield,
+    title: "10. Google API Disclosure",
+    content: [
+      "Hesabi's use and transfer to any other app of information received from Google APIs will adhere to Google API Services User Data Policy, including the Limited Use requirements.",
+    ],
+    note: "We only request access to your basic profile information and email address to provide a secure login experience.",
+    highlighted: true, // Make this stand out for the Google reviewer
+  },
 ];
 
 export default function PrivacyContent() {
