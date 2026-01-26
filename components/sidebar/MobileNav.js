@@ -19,7 +19,7 @@ export default function MobileNav({ items, currentPath, onItemClick }) {
     {
       name: "recurringbills",
       label: "Recurring Bills",
-      href: "/recurringbills",
+      href: "/recurring-bills",
       icon: RiBillLine,
     },
     {
