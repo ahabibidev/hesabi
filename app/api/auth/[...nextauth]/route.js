@@ -65,14 +65,9 @@ export const authOptions = {
         const email = credentials.email.toLowerCase().trim();
         const user = await queryOne("SELECT * FROM users WHERE email = ?", [email]);
 
-        if (!user) {
-          throw new Error("No user found with this email");
-        }
-
-        if (!user.password) {
-          throw new Error(
-            `This email is registered with ${user.provider}. Please sign in with ${user.provider}.`,
-          );
+        if (!user || !user.password) {
+          // Return a generic error message to prevent user enumeration.
+          throw new Error("Invalid credentials");
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -81,7 +76,8 @@ export const authOptions = {
         );
 
         if (!isPasswordValid) {
-          throw new Error("Invalid password");
+          // Return a generic error message to prevent timing attacks and user enumeration.
+          throw new Error("Invalid credentials");
         }
 
         return {

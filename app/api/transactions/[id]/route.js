@@ -59,6 +59,32 @@ export async function PATCH(request, { params }) {
 
     const body = await request.json();
 
+    // --- Input Validation ---
+    if (body.amount !== undefined) {
+      const amount = parseFloat(body.amount);
+      if (Number.isNaN(amount) || amount <= 0) {
+        return NextResponse.json(
+          { error: "Amount must be a positive number" },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (body.date && Number.isNaN(new Date(body.date).getTime())) {
+      return NextResponse.json(
+        { error: "Date must be a valid date" },
+        { status: 400 }
+      );
+    }
+
+    if (body.type && !["income", "expense"].includes(body.type)) {
+      return NextResponse.json(
+        { error: "Type must be either 'income' or 'expense'" },
+        { status: 400 }
+      );
+    }
+    // --- End Input Validation ---
+
     const updated = await updateTransaction(transactionId, session.user.id, body);
 
     if (!updated) {

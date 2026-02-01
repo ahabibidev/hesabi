@@ -1,8 +1,9 @@
 // app/api/user/profile/route.js
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { queryOne, execute } from "@/lib/db";
+import { queryOne, execute, deleteUser } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { signOut } from "next-auth/react";
 
 // GET - Fetch user profile
 export async function GET() {
@@ -59,24 +60,32 @@ export async function PATCH(request) {
     const body = await request.json();
     const { firstName, lastName, email, avatar, currency, theme } = body;
 
-    // Build dynamic update query
+    // --- Input Validation ---
     const updates = [];
     const values = [];
 
     if (firstName !== undefined) {
+      const sanitizedFirstName = firstName.trim().replace(/(<([^>]+)>)/gi, "");
       updates.push("name = ?");
-      values.push(firstName.trim());
+      values.push(sanitizedFirstName);
     }
 
     if (lastName !== undefined) {
+      const sanitizedLastName = lastName.trim().replace(/(<([^>]+)>)/gi, "");
       updates.push("last_name = ?");
-      values.push(lastName.trim());
+      values.push(sanitizedLastName);
     }
 
     if (email !== undefined) {
+      const normalizedEmail = email.toLowerCase().trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(normalizedEmail)) {
+        return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+      }
+      
       const existingUser = await queryOne(
         "SELECT id FROM users WHERE email = ? AND id != ?",
-        [email, session.user.id],
+        [normalizedEmail, session.user.id],
       );
 
       if (existingUser) {
@@ -87,33 +96,40 @@ export async function PATCH(request) {
       }
 
       updates.push("email = ?");
-      values.push(email);
+      values.push(normalizedEmail);
     }
 
     if (avatar !== undefined) {
+      // A more robust validation would check if the avatar is a valid URL or path
       updates.push("avatar = ?");
       values.push(avatar);
     }
 
     if (currency !== undefined) {
+      if (!/^[A-Z]{3}$/.test(currency)) {
+        return NextResponse.json({ error: "Invalid currency format" }, { status: 400 });
+      }
       updates.push("currency = ?");
       values.push(currency);
     }
 
     if (theme !== undefined) {
+      if (!["light", "dark"].includes(theme)) {
+        return NextResponse.json({ error: "Invalid theme" }, { status: 400 });
+      }
       updates.push("theme = ?");
       values.push(theme);
     }
 
-    updates.push("updated_at = CURRENT_TIMESTAMP");
-
-    if (updates.length === 1) {
+    if (updates.length === 0) {
       return NextResponse.json(
         { error: "No fields to update" },
         { status: 400 },
       );
     }
+    // --- End Input Validation ---
 
+    updates.push("updated_at = CURRENT_TIMESTAMP");
     values.push(session.user.id);
 
     const query = `UPDATE users SET ${updates.join(", ")} WHERE id = ?`;
@@ -141,6 +157,27 @@ export async function PATCH(request) {
     });
   } catch (error) {
     console.error("Error updating user profile:", error);
+    return NextResponse.json(
+      { error: "Internal server error", details: error.message },
+      { status: 500 },
+    );
+  }
+}
+
+// DELETE - Delete user account
+export async function DELETE() {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await deleteUser(session.user.id);
+
+    return NextResponse.json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user account:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },
       { status: 500 },

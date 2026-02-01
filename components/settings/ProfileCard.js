@@ -74,6 +74,7 @@ const ProfileCard = memo(function ProfileCard({
           onChange={onProfileChange}
           className="mt-2"
           required
+          disabled="disabled"
         />
       </div>
     </div>
