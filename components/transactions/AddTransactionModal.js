@@ -293,7 +293,7 @@ export default function AddTransactionModal({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-2xl shadow-2xl min-h-[60vh] max-h-[85vh] overflow-hidden"
+            className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-2xl shadow-2xl min-h-[40vh] max-h-[65vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Mobile Header */}
@@ -701,47 +701,51 @@ function MobileFormContent({
       />
 
       {/* Recurring Toggle */}
-      <div className="flex items-center justify-between py-1">
-        <span className="text-sm text-foreground">Recurring</span>
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            name="recurring"
-            checked={formData.recurring}
-            onChange={handleChange}
-            disabled={isLoading}
-            className="sr-only peer"
-          />
-          <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-        </label>
-      </div>
 
-      {/* Recurring Interval */}
-      {formData.recurring && (
-        <div>
-          <select
-            name="recurringInterval"
-            value={formData.recurringInterval}
-            onChange={handleChange}
-            disabled={isLoading}
-            className={`w-full px-3 py-2.5 rounded-lg border text-sm ${
-              errors.recurringInterval ? "border-red-500" : "border-text/20"
-            } bg-background focus:outline-none disabled:opacity-50`}
-          >
-            <option value="">Select repeat interval *</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-          </select>
-          {errors.recurringInterval && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors.recurringInterval}
-            </p>
+      {formData.type === "expense" && (
+        <>
+          <div className="flex items-center justify-between py-1">
+            <span className="text-sm text-foreground">Recurring</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                name="recurring"
+                checked={formData.recurring}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="sr-only peer"
+              />
+              <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+
+          {/* Recurring Interval */}
+          {formData.recurring && (
+            <div>
+              <select
+                name="recurringInterval"
+                value={formData.recurringInterval}
+                onChange={handleChange}
+                disabled={isLoading}
+                className={`w-full px-3 py-2.5 rounded-lg border text-sm ${
+                  errors.recurringInterval ? "border-red-500" : "border-text/20"
+                } bg-background focus:outline-none disabled:opacity-50`}
+              >
+                <option value="">Select repeat interval *</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+              {errors.recurringInterval && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.recurringInterval}
+                </p>
+              )}
+            </div>
           )}
-        </div>
+        </>
       )}
-
       {/* Safe area padding for phones with home indicator */}
       <div className="h-4" />
     </div>
