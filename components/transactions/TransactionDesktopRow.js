@@ -154,7 +154,7 @@ function TransactionDesktopRow({
           </button>
           <button
             onClick={handleEdit}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-text hover:text-foreground transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:text-gray-100 dark:hover:bg-gray-800 text-text hover:text-foreground transition-colors"
             title="Edit"
             aria-label="Edit transaction"
           >
