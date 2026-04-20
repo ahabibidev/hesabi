@@ -176,7 +176,7 @@ This project is licensed under the **GNU Affero General Public License v3.0** - 
 
 <div align="center">
   
-Made with ❤️ by [Ali Reza Habibi](https://github.com/ahabibidev)
+Made with ❤️ by [Ali Reza Habibi](https://ahabibi.dev)
 
 ⭐ Star this repository if you find it helpful!
 
