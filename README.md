@@ -10,7 +10,7 @@ A modern, intuitive personal finance management application built with Next.js
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 [![Turso](https://img.shields.io/badge/Turso-SQLite-4FF8D2?logo=turso)](https://turso.tech/)
 
-[Live Demo](https://hesabi.vercel.app) · [Report Bug](https://github.com/shahreyarhabibi/hesabi/issues) · [Request Feature](https://github.com/shahreyarhabibi/hesabi/issues)
+[Live Demo](https://hesabi.vercel.app) · [Report Bug](https://github.com/ahabibidev/hesabi/issues) · [Request Feature](https://github.com/ahabibidev/hesabi/issues)
 
   <img src="public/screenshots/dashboard.png" alt="Hesabi Dashboard" width="800" />
 </div>
@@ -95,7 +95,7 @@ A modern, intuitive personal finance management application built with Next.js
 
 1. **Clone the repository**
    ```
-   git clone https://github.com/shahreyarhabibi/hesabi.git
+   git clone https://github.com/ahabibidev/hesabi.git
    cd hesabi
    ```
 2. **Install dependencies**
@@ -150,9 +150,9 @@ Contributions are welcome! Please follow these steps:
 
 **Ali Reza Habibi** — Software Engineer
 
-[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/shahreyarhabibi)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ahabibidev)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/ali-reza-habibi)
-[![Portfolio](https://img.shields.io/badge/Portfolio-FF5722?style=for-the-badge&logo=google-chrome&logoColor=white)](https://ahabibi.vercel.app)
+[![Portfolio](https://img.shields.io/badge/Portfolio-FF5722?style=for-the-badge&logo=google-chrome&logoColor=white)](https://ahabibi.dev)
 
 </div>
 
@@ -176,7 +176,7 @@ This project is licensed under the **GNU Affero General Public License v3.0** - 
 
 <div align="center">
   
-Made with ❤️ by [Ali Reza Habibi](https://github.com/shahreyarhabibi)
+Made with ❤️ by [Ali Reza Habibi](https://github.com/ahabibidev)
 
 ⭐ Star this repository if you find it helpful!
 

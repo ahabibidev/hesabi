@@ -19,7 +19,7 @@ import {
 
 const APP_INFO = {
   name: "Hesabi",
-  email: "shahreyarhabibi@gmail.com",
+  email: "contact@ahabibi.dev",
   lastUpdated: "January 15, 2026",
 };
 

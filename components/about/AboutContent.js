@@ -41,17 +41,17 @@ const DEVELOPER = {
   socials: [
     {
       name: "GitHub",
-      url: "https://github.com/shahreyarhabibi",
+      url: "https://github.com/ahabibidev",
       icon: Github,
     },
     {
       name: "LinkedIn",
-      url: "https://linkedin.com/in/ali-reza-habibi",
+      url: "https://linkedin.com/in/ahabibidev",
       icon: Linkedin,
     },
     {
       name: "Portfolio",
-      url: "https://ahabibi.vercel.app",
+      url: "https://ahabibi.dev",
       icon: Globe,
     },
   ],
