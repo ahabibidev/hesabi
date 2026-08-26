@@ -31,6 +31,27 @@ export function ThemeProvider({ children }) {
     }
   };
 
+  // ✅ Keep the PWA/browser chrome in step with the resolved theme.
+  // Every theme-color tag is rewritten, not just the matching one: the layout
+  // ships light and dark media variants, and a manual override has to win over
+  // whichever of those the OS preference would otherwise select.
+  const updateThemeColor = (currentTheme) => {
+    const color = currentTheme === "light" ? "#f8fafc" : "#0e121b";
+    const tags = document.querySelectorAll("meta[name='theme-color']");
+
+    if (tags.length === 0) {
+      const meta = document.createElement("meta");
+      meta.name = "theme-color";
+      meta.content = color;
+      document.head.appendChild(meta);
+      return;
+    }
+
+    tags.forEach((tag) => {
+      tag.content = color;
+    });
+  };
+
   // Load saved theme on mount
   useEffect(() => {
     setMounted(true);
@@ -62,6 +83,7 @@ export function ThemeProvider({ children }) {
 
     // ✅ Update favicon
     updateFavicon(effectiveTheme);
+    updateThemeColor(effectiveTheme);
 
     // Save to localStorage
     localStorage.setItem("theme", theme);
@@ -81,6 +103,7 @@ export function ThemeProvider({ children }) {
 
       // ✅ Update favicon when system theme changes
       updateFavicon(newTheme);
+      updateThemeColor(newTheme);
     };
 
     mediaQuery.addEventListener("change", handleChange);

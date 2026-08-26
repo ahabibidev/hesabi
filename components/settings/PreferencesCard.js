@@ -5,7 +5,7 @@ import { memo, useState } from "react";
 import CurrencySelector from "./CurrencySelector";
 import ThemeToggle from "./ThemeToggle";
 import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
-import { signOut } from "next-auth/react";
+import { signOutAndClearCaches } from "@/lib/pwa";
 
 const PreferencesCard = memo(function PreferencesCard({
   userProfile,
@@ -30,7 +30,7 @@ const PreferencesCard = memo(function PreferencesCard({
       }
 
       // On successful deletion, sign the user out
-      await signOut({ callbackUrl: "/login" });
+      await signOutAndClearCaches({ callbackUrl: "/login" });
     } catch (err) {
       setError(err.message);
       setIsDeleting(false);

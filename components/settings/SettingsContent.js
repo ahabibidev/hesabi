@@ -9,6 +9,7 @@ import SecurityCard from "./SecurityCard";
 import PreferencesCard from "./PreferencesCard";
 import SaveSettingsCard from "./SaveSettingsCard";
 import SettingsSkeleton from "./SettingsSkeleton";
+import InstallAppCard from "@/components/pwa/InstallAppCard";
 import { DEFAULT_PASSWORD_DATA } from "@/lib/constants";
 import { AVATAR_OPTIONS, CURRENCY_OPTIONS } from "@/lib/constants";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -294,6 +295,8 @@ export default function SettingsContent() {
               onPasswordChange={handlePasswordChange}
             />
           )}
+
+          <InstallAppCard />
 
           <PreferencesCard
             userProfile={userProfile}

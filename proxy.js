@@ -6,11 +6,15 @@ export async function proxy(req) {
   const url = req.nextUrl.clone();
   const { pathname } = req.nextUrl;
 
-  // Skip middleware for Next.js internals
+  // Skip middleware for Next.js internals and PWA entry points. The service
+  // worker, manifest and offline page must stay reachable while signed out.
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api/auth") ||
-    pathname === "/favicon.ico"
+    pathname === "/favicon.ico" ||
+    pathname === "/sw.js" ||
+    pathname === "/manifest.webmanifest" ||
+    pathname === "/offline.html"
   ) {
     return NextResponse.next();
   }

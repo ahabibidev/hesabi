@@ -1,10 +1,10 @@
 // components/sidebar/LogoutButton.jsx
 import { FiLogOut } from "react-icons/fi";
-import { signOut } from "next-auth/react";
+import { signOutAndClearCaches } from "@/lib/pwa";
 
 export default function LogoutButton({ isCollapsed }) {
   const handleLogout = async () => {
-    await signOut({ callbackUrl: "/login" });
+    await signOutAndClearCaches({ callbackUrl: "/login" });
   };
 
   return (

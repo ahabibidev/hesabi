@@ -12,6 +12,7 @@
 
 import { Poppins } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeContext";
+import ServiceWorkerRegistrar from "@/components/pwa/ServiceWorkerRegistrar";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -23,9 +24,32 @@ const poppins = Poppins({
 export const metadata = {
   title: "Hesabi",
   description: "Know Where Your Money Goes",
+  applicationName: "Hesabi",
+  appleWebApp: {
+    capable: true,
+    title: "Hesabi",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: "/favicon-dark.ico",
+    apple: "/icons/apple-touch-icon.png",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Lets the standalone window paint into the notch/home-indicator area.
+  viewportFit: "cover",
+  // Matches --background in globals.css. ThemeProvider rewrites these at
+  // runtime so a manual light/dark override also moves the browser chrome.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e121b" },
+  ],
 };
 
 export default function RootLayout({ children }) {
@@ -39,6 +63,7 @@ export default function RootLayout({ children }) {
         className={`${poppins.variable} font-sans antialiased`}
       >
         <ThemeProvider>{children}</ThemeProvider>
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );

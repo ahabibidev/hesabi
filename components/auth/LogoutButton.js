@@ -1,7 +1,7 @@
 // components/auth/LogoutButtonWithConfirmation.jsx
 "use client";
 
-import { signOut } from "next-auth/react";
+import { signOutAndClearCaches } from "@/lib/pwa";
 import { FiLogOut } from "react-icons/fi";
 import { useState } from "react";
 
@@ -12,7 +12,7 @@ export default function LogoutButtonWithConfirmation() {
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      await signOut({
+      await signOutAndClearCaches({
         redirect: true,
         callbackUrl: "/login",
       });

@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
+import { signOutAndClearCaches } from "@/lib/pwa";
 import { MoreHorizontal, Settings, Info, LogOut, X } from "lucide-react";
 import { RiBillLine } from "react-icons/ri";
 
@@ -55,7 +55,7 @@ export default function MobileNav({ items, currentPath, onItemClick }) {
   const isMoreActive = moreMenuItems.some((item) => currentPath === item.href);
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: "/login" });
+    await signOutAndClearCaches({ callbackUrl: "/login" });
   };
 
   return (
