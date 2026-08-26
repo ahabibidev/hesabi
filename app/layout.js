@@ -12,6 +12,7 @@
 
 import { Poppins } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeContext";
+import ServiceWorkerRegistrar from "@/components/pwa/ServiceWorkerRegistrar";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -62,6 +63,7 @@ export default function RootLayout({ children }) {
         className={`${poppins.variable} font-sans antialiased`}
       >
         <ThemeProvider>{children}</ThemeProvider>
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );
