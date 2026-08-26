@@ -84,6 +84,7 @@ export async function PATCH(request, { params }) {
       color: body.color ?? null,
       icon: body.icon ?? null,
       deadline: body.deadline ?? null,
+      currency: body.currency ?? null,
     };
 
     // Update the pot

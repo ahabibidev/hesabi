@@ -4,7 +4,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { FiX, FiPlus, FiMinus } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
-import { formatCurrency } from "@/lib/constants";
+import { formatCurrency, CURRENCY_OPTIONS } from "@/lib/constants";
+import { currencySymbol, rateBetween, roundMoney } from "@/lib/currency";
 import { calculateProgress } from "@/utils/potsUtils";
 
 export default function PotMoneyModal({
@@ -12,28 +13,49 @@ export default function PotMoneyModal({
   onClose,
   pot,
   type = "add", // "add" or "withdraw"
-  currency = "USD",
+  mainCurrency = "USD",
+  rateMap = {},
   onConfirm,
   isLoading = false,
 }) {
   const [amount, setAmount] = useState("");
+  const [entryCurrency, setEntryCurrency] = useState(mainCurrency);
+  const [rate, setRate] = useState("");
   const [error, setError] = useState("");
 
   const isAdding = type === "add";
+
+  // Every figure in this modal is the pot's own money, so it is shown in the
+  // pot's currency. Only the input below may differ.
+  const currency = pot?.currency || mainCurrency;
+  const isCrossCurrency = entryCurrency !== currency;
 
   // Reset when modal opens
   useEffect(() => {
     if (isOpen) {
       setAmount("");
       setError("");
+      setEntryCurrency(pot?.currency || mainCurrency);
+      setRate("");
     }
-  }, [isOpen, type]);
+  }, [isOpen, type, pot, mainCurrency]);
+
+  // What the typed amount becomes once it is inside the pot.
+  const convertedAmount = useMemo(() => {
+    const typed = parseFloat(amount) || 0;
+    if (!isCrossCurrency) return typed;
+
+    const usedRate = parseFloat(rate);
+    if (!usedRate || usedRate <= 0) return 0;
+
+    return roundMoney(typed * usedRate, currency);
+  }, [amount, rate, isCrossCurrency, currency]);
 
   // Calculate preview values
   const previewData = useMemo(() => {
     if (!pot) return null;
 
-    const inputAmount = parseFloat(amount) || 0;
+    const inputAmount = convertedAmount;
     const currentSaved = pot.saved || 0;
     const target = pot.target || 0;
 
@@ -62,7 +84,15 @@ export default function PotMoneyModal({
       newProgress,
       difference: Math.abs(newSaved - currentSaved),
     };
-  }, [pot, amount, isAdding]);
+  }, [pot, convertedAmount, isAdding]);
+
+  // Pre-fill the rate for the chosen pair; still editable per move.
+  useEffect(() => {
+    if (!isCrossCurrency || rate) return;
+
+    const suggested = rateBetween(entryCurrency, currency, mainCurrency, rateMap);
+    if (suggested) setRate(String(Number(suggested.toFixed(8))));
+  }, [isCrossCurrency, entryCurrency, currency, mainCurrency, rateMap, rate]);
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
@@ -71,7 +101,10 @@ export default function PotMoneyModal({
 
     if (!previewData) return;
 
-    const numValue = parseFloat(value) || 0;
+    const typed = parseFloat(value) || 0;
+    const numValue = isCrossCurrency
+      ? roundMoney(typed * (parseFloat(rate) || 0), currency)
+      : typed;
 
     if (numValue < 0) {
       setError("Amount must be positive");
@@ -95,10 +128,16 @@ export default function PotMoneyModal({
   };
 
   const handleSetMax = () => {
-    if (previewData) {
-      setAmount(previewData.maxAllowed.toString());
-      setError("");
-    }
+    if (!previewData) return;
+
+    const usedRate = parseFloat(rate);
+    const maxInEntryCurrency =
+      isCrossCurrency && usedRate > 0
+        ? roundMoney(previewData.maxAllowed / usedRate, entryCurrency)
+        : previewData.maxAllowed;
+
+    setAmount(maxInEntryCurrency.toString());
+    setError("");
   };
 
   const handleSubmit = (e) => {
@@ -109,13 +148,22 @@ export default function PotMoneyModal({
       return;
     }
 
-    const numAmount = parseFloat(amount);
-
-    if (numAmount > previewData.maxAllowed) {
+    if (isCrossCurrency && !(parseFloat(rate) > 0)) {
+      setError(`Enter today's ${entryCurrency} to ${currency} rate`);
       return;
     }
 
-    onConfirm(pot.id, numAmount);
+    if (convertedAmount > previewData.maxAllowed) {
+      return;
+    }
+
+    // The pot is credited in its own currency; the move is recorded with what
+    // was actually handed over and the rate it was changed at.
+    onConfirm(pot.id, convertedAmount, {
+      originalAmount: parseFloat(amount),
+      originalCurrency: entryCurrency,
+      exchangeRate: isCrossCurrency ? parseFloat(rate) : 1,
+    });
   };
 
   const handleClose = () => {
@@ -264,32 +312,62 @@ export default function PotMoneyModal({
                 <label className="block text-sm font-medium text-foreground mb-2">
                   Amount to {isAdding ? "Add" : "Withdraw"}
                 </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text/50 text-lg">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={handleAmountChange}
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text/50 text-lg">
+                      {currencySymbol(entryCurrency)}
+                    </span>
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={handleAmountChange}
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                      disabled={isLoading}
+                      className={`w-full pl-10 pr-20 py-4 rounded-xl border text-lg font-medium ${
+                        error ? "border-red-500" : "border-text/20"
+                      } bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50`}
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSetMax}
+                      disabled={isLoading}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      MAX
+                    </button>
+                  </div>
+
+                  <select
+                    value={entryCurrency}
+                    onChange={(e) => {
+                      setEntryCurrency(e.target.value);
+                      setRate("");
+                      setError("");
+                    }}
                     disabled={isLoading}
-                    className={`w-full pl-10 pr-20 py-4 rounded-xl border text-lg font-medium ${
-                      error ? "border-red-500" : "border-text/20"
-                    } bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50`}
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSetMax}
-                    disabled={isLoading}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
+                    aria-label="Currency you are moving"
+                    className="w-24 px-2 rounded-xl border border-text/20 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
                   >
-                    MAX
-                  </button>
+                    {CURRENCY_OPTIONS.map((option) => (
+                      <option key={option.code} value={option.code}>
+                        {option.code}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
+                <ConversionRow
+                  show={isCrossCurrency}
+                  entryCurrency={entryCurrency}
+                  currency={currency}
+                  rate={rate}
+                  setRate={setRate}
+                  convertedAmount={convertedAmount}
+                  isLoading={isLoading}
+                />
                 {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
                 <p className="mt-2 text-xs text-text/50">
                   {isAdding
@@ -422,7 +500,9 @@ export default function PotMoneyModal({
               {/* Amount Input - Prominent */}
               <div className="flex flex-col text-center py-4">
                 <div className="relative items-center">
-                  <span className="text-3xl text-text/50 mr-1">$</span>
+                  <span className="text-3xl text-text/50 mr-1">
+                    {currencySymbol(entryCurrency)}
+                  </span>
                   <input
                     type="number"
                     value={amount}
@@ -434,6 +514,36 @@ export default function PotMoneyModal({
                     className={`text-4xl font-bold text-center w-40 bg-transparent border-b-2 ${
                       error ? "border-red-500" : "border-text/20"
                     } focus:outline-none focus:border-primary py-1 disabled:opacity-50`}
+                  />
+                </div>
+
+                <select
+                  value={entryCurrency}
+                  onChange={(e) => {
+                    setEntryCurrency(e.target.value);
+                    setRate("");
+                    setError("");
+                  }}
+                  disabled={isLoading}
+                  aria-label="Currency you are moving"
+                  className="mt-3 w-28 mx-auto block px-2 py-1.5 rounded-lg border border-text/20 bg-background text-sm text-center focus:outline-none disabled:opacity-50"
+                >
+                  {CURRENCY_OPTIONS.map((option) => (
+                    <option key={option.code} value={option.code}>
+                      {option.code}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="text-left">
+                  <ConversionRow
+                    show={isCrossCurrency}
+                    entryCurrency={entryCurrency}
+                    currency={currency}
+                    rate={rate}
+                    setRate={setRate}
+                    convertedAmount={convertedAmount}
+                    isLoading={isLoading}
                   />
                 </div>
                 {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
@@ -543,5 +653,55 @@ function LoadingSpinner() {
         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
       />
     </svg>
+  );
+}
+
+/**
+ * The rate used for this particular move, and what it lands as inside the pot.
+ * Shown only when the money being moved is not already the pot's currency.
+ */
+function ConversionRow({
+  show,
+  entryCurrency,
+  currency,
+  rate,
+  setRate,
+  convertedAmount,
+  isLoading,
+}) {
+  if (!show) return null;
+
+  return (
+    <div className="mt-3 rounded-lg border border-text/10 bg-text/5 p-3 space-y-2">
+      <div className="flex items-center gap-2">
+        <label className="text-xs text-text/70 whitespace-nowrap">
+          1 {entryCurrency} =
+        </label>
+        <input
+          type="number"
+          value={rate}
+          onChange={(e) => setRate(e.target.value)}
+          placeholder="0"
+          min="0"
+          step="any"
+          disabled={isLoading}
+          className="w-28 px-2 py-1 rounded border border-text/20 bg-transparent text-xs focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+        />
+        <span className="text-xs text-text/70">{currency}</span>
+      </div>
+
+      <p className="text-xs text-text/70">
+        {convertedAmount > 0 ? (
+          <>
+            Goes into the pot as{" "}
+            <span className="font-semibold text-foreground">
+              {formatCurrency(convertedAmount, currency)}
+            </span>
+          </>
+        ) : (
+          `Enter a rate to convert ${entryCurrency} into ${currency}.`
+        )}
+      </p>
+    </div>
   );
 }

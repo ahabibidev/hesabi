@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getPotById, withdrawFromPot } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { resolveEntryAmounts } from "@/lib/currency";
 
 export async function POST(request, { params }) {
   try {
@@ -37,13 +38,29 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: "Pot not found" }, { status: 404 });
     }
 
-    // Check if there's enough balance
-    if (existingPot.saved_amount < parseFloat(amount)) {
+    // A pot is the target here, so the move is converted into the POT's
+    // currency — its balance is what must stay stable, not the main total.
+    const potCurrency = existingPot.currency || null;
+    const money = resolveEntryAmounts({
+      amount,
+      originalAmount: body.originalAmount,
+      originalCurrency: body.originalCurrency,
+      exchangeRate: body.exchangeRate,
+      mainCurrency: potCurrency || body.originalCurrency || "USD",
+    });
+
+    if (money.error) {
+      return NextResponse.json({ error: money.error }, { status: 400 });
+    }
+
+    // Compare in the pot's own currency — the raw request amount may have been
+    // entered in another one.
+    if (existingPot.saved_amount < money.amount) {
       return NextResponse.json(
         {
           error: "Insufficient balance",
           available: existingPot.saved_amount,
-          requested: parseFloat(amount),
+          requested: money.amount,
         },
         { status: 400 },
       );
@@ -53,8 +70,13 @@ export async function POST(request, { params }) {
     const updatedPot = await withdrawFromPot(
       potId,
       session.user.id,
-      parseFloat(amount),
+      money.amount,
       note || null,
+      {
+        originalAmount: money.originalAmount,
+        originalCurrency: money.originalCurrency,
+        exchangeRate: money.exchangeRate,
+      },
     );
 
     return NextResponse.json({
