@@ -62,6 +62,18 @@ A modern, intuitive personal finance management application built with Next.js
 - Customizable avatars
 - Multi-currency support (USD, EUR, GBP, AFN, IRR, INR, PKR)
 
+### 📱 **Installable App (PWA)**
+
+- Install to your home screen or desktop and launch in a standalone window
+- App shortcuts straight to Transactions, Budgets, Pots and Recurring Bills
+- Assets are served from a service worker cache for instant repeat loads
+- A branded offline page when the connection drops
+- In-app prompt when a new version has been deployed
+
+> **Privacy note:** the service worker never caches page HTML or `/api` responses.
+> Balances, transactions and session data always come from the network, so no
+> readable copy of your finances is left behind on a shared device.
+
 ---
 
 ## 🛠️ Tech Stack
@@ -78,6 +90,7 @@ A modern, intuitive personal finance management application built with Next.js
 | **Email**          | [Brevo](https://www.brevo.com/)                 |
 | **Animations**     | [Framer Motion](https://www.framer.com/motion/) |
 | **Deployment**     | [Vercel](https://vercel.com/)                   |
+| **PWA**            | Web App Manifest + custom service worker        |
 
 ---
 
