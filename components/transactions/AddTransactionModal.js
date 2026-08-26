@@ -5,6 +5,8 @@ import { useState, useEffect, useMemo } from "react";
 import { FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { DEFAULT_CATEGORIES } from "@/lib/constants";
+import { rateBetween, roundMoney } from "@/lib/currency";
+import CurrencyAmountField from "@/components/ui/CurrencyAmountField";
 
 export default function AddTransactionModal({
   isOpen,
@@ -13,12 +15,16 @@ export default function AddTransactionModal({
   onUpdateTransaction,
   editingTransaction,
   categories = [],
+  mainCurrency = "USD",
+  rateMap = {},
   isLoading = false,
 }) {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     amount: "",
+    currency: mainCurrency,
+    exchangeRate: "",
     type: "expense",
     categoryId: "",
     date: new Date().toISOString().split("T")[0],
@@ -75,7 +81,16 @@ export default function AddTransactionModal({
         setFormData({
           name: editingTransaction.name || "",
           description: editingTransaction.description || "",
-          amount: Math.abs(editingTransaction.amount).toString(),
+          // Reopen with what was actually typed, not the converted figure.
+          amount: Math.abs(
+            editingTransaction.originalAmount ?? editingTransaction.amount,
+          ).toString(),
+          currency: editingTransaction.originalCurrency || mainCurrency,
+          exchangeRate:
+            editingTransaction.exchangeRate &&
+            editingTransaction.exchangeRate !== 1
+              ? String(editingTransaction.exchangeRate)
+              : "",
           type: editingTransaction.type?.toLowerCase() || "expense",
           categoryId:
             category?.id?.toString() ||
@@ -93,6 +108,8 @@ export default function AddTransactionModal({
           name: "",
           description: "",
           amount: "",
+          currency: mainCurrency,
+          exchangeRate: "",
           type: "expense",
           categoryId: "",
           date: new Date().toISOString().split("T")[0],
@@ -102,7 +119,7 @@ export default function AddTransactionModal({
       }
       setErrors({});
     }
-  }, [isOpen, editingTransaction, availableCategories]);
+  }, [isOpen, editingTransaction, availableCategories, mainCurrency]);
 
   // Update category when type changes
   useEffect(() => {
@@ -153,6 +170,15 @@ export default function AddTransactionModal({
       newErrors.amount = "Please enter a valid amount";
     }
 
+    // A foreign entry cannot be recorded without a rate — we would have to
+    // guess what it was worth, and that guess would become permanent.
+    if (formData.currency !== mainCurrency) {
+      const rate = parseFloat(formData.exchangeRate);
+      if (!rate || rate <= 0) {
+        newErrors.amount = `Enter today's ${formData.currency} to ${mainCurrency} rate`;
+      }
+    }
+
     if (!formData.categoryId) {
       newErrors.categoryId = "Please select a category";
     }
@@ -176,10 +202,22 @@ export default function AddTransactionModal({
       return;
     }
 
+    const originalAmount = parseFloat(formData.amount);
+    const isForeign = formData.currency !== mainCurrency;
+
+    // Freeze the rate onto the record. From here the entry is worth what it was
+    // worth today, no matter what the rate does later.
+    const exchangeRate = isForeign ? parseFloat(formData.exchangeRate) : 1;
+
     const transactionData = {
       ...formData,
       categoryId: parseInt(formData.categoryId),
-      amount: parseFloat(formData.amount),
+      // `amount` is always the main-currency value — this is what every total,
+      // budget and chart in the app sums over.
+      amount: roundMoney(originalAmount * exchangeRate, mainCurrency),
+      originalAmount,
+      originalCurrency: formData.currency,
+      exchangeRate,
       date: new Date(formData.date).toISOString(),
     };
 
@@ -254,6 +292,8 @@ export default function AddTransactionModal({
                 isLoading={isLoading}
                 handleChange={handleChange}
                 setFormData={setFormData}
+                mainCurrency={mainCurrency}
+                rateMap={rateMap}
               />
 
               {/* Desktop Buttons */}
@@ -336,6 +376,8 @@ export default function AddTransactionModal({
                 isLoading={isLoading}
                 handleChange={handleChange}
                 setFormData={setFormData}
+                mainCurrency={mainCurrency}
+                rateMap={rateMap}
               />
             </form>
           </motion.div>
@@ -379,6 +421,8 @@ function ModalFormContent({
   isLoading,
   handleChange,
   setFormData,
+  mainCurrency,
+  rateMap,
 }) {
   return (
     <div className="space-y-4">
@@ -431,53 +475,44 @@ function ModalFormContent({
         )}
       </div>
 
-      {/* Amount & Date Row */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Amount <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-2.5 text-text/50 text-sm">
-              $
-            </span>
-            <input
-              type="number"
-              name="amount"
-              value={formData.amount}
-              onChange={handleChange}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-              disabled={isLoading}
-              className={`w-full pl-7 pr-3 py-2.5 rounded-lg border text-sm ${
-                errors.amount ? "border-red-500" : "border-text/20"
-              } bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50`}
-            />
-          </div>
-          {errors.amount && (
-            <p className="mt-1 text-xs text-red-500">{errors.amount}</p>
-          )}
-        </div>
+      {/* Amount (with its own currency) */}
+      <CurrencyAmountField
+        amount={formData.amount}
+        currency={formData.currency}
+        rate={formData.exchangeRate}
+        onAmountChange={(value) =>
+          setFormData((prev) => ({ ...prev, amount: value }))
+        }
+        onCurrencyChange={(value) =>
+          setFormData((prev) => ({ ...prev, currency: value }))
+        }
+        onRateChange={(value) =>
+          setFormData((prev) => ({ ...prev, exchangeRate: value }))
+        }
+        mainCurrency={mainCurrency}
+        rateMap={rateMap}
+        error={errors.amount}
+        disabled={isLoading}
+      />
 
-        <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Date <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            disabled={isLoading}
-            className={`w-full px-3 py-2.5 rounded-lg border text-sm ${
-              errors.date ? "border-red-500" : "border-text/20"
-            } bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50`}
-          />
-          {errors.date && (
-            <p className="mt-1 text-xs text-red-500">{errors.date}</p>
-          )}
-        </div>
+      {/* Date */}
+      <div>
+        <label className="block text-xs font-medium text-foreground mb-1.5">
+          Date <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="date"
+          name="date"
+          value={formData.date}
+          onChange={handleChange}
+          disabled={isLoading}
+          className={`w-full px-3 py-2.5 rounded-lg border text-sm ${
+            errors.date ? "border-red-500" : "border-text/20"
+          } bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50`}
+        />
+        {errors.date && (
+          <p className="mt-1 text-xs text-red-500">{errors.date}</p>
+        )}
       </div>
 
       {/* Category */}
@@ -582,6 +617,8 @@ function MobileFormContent({
   isLoading,
   handleChange,
   setFormData,
+  mainCurrency,
+  rateMap,
 }) {
   return (
     <div className="space-y-4">
@@ -613,28 +650,26 @@ function MobileFormContent({
         </button>
       </div>
 
-      {/* Amount - Prominent */}
-      <div className="text-center py-2">
-        <div className="relative inline-flex items-center">
-          <span className="text-2xl text-text/50 mr-1">$</span>
-          <input
-            type="number"
-            name="amount"
-            value={formData.amount}
-            onChange={handleChange}
-            placeholder="0.00"
-            min="0"
-            step="0.01"
-            disabled={isLoading}
-            className={`text-3xl font-bold text-center w-32 bg-transparent border-b-2 ${
-              errors.amount ? "border-red-500" : "border-text/20"
-            } focus:outline-none focus:border-primary py-1 disabled:opacity-50`}
-          />
-        </div>
-        {errors.amount && (
-          <p className="mt-1 text-xs text-red-500">{errors.amount}</p>
-        )}
-      </div>
+      {/* Amount (with its own currency) */}
+      <CurrencyAmountField
+        amount={formData.amount}
+        currency={formData.currency}
+        rate={formData.exchangeRate}
+        onAmountChange={(value) =>
+          setFormData((prev) => ({ ...prev, amount: value }))
+        }
+        onCurrencyChange={(value) =>
+          setFormData((prev) => ({ ...prev, currency: value }))
+        }
+        onRateChange={(value) =>
+          setFormData((prev) => ({ ...prev, exchangeRate: value }))
+        }
+        mainCurrency={mainCurrency}
+        rateMap={rateMap}
+        error={errors.amount}
+        disabled={isLoading}
+        large
+      />
 
       {/* Name */}
       <div>

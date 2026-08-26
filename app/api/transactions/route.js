@@ -1,7 +1,8 @@
 // app/api/transactions/route.js
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { getTransactions, createTransaction } from "@/lib/db";
+import { getTransactions, createTransaction, getUserById } from "@/lib/db";
+import { resolveEntryAmounts } from "@/lib/currency";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
@@ -62,12 +63,19 @@ export async function POST(request) {
       );
     }
 
-    const parsedAmount = parseFloat(amount);
-    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
-      return NextResponse.json(
-        { error: "Amount must be a number greater than 0" },
-        { status: 400 },
-      );
+    // The main-currency value is derived here rather than trusted, so
+    // `amount = originalAmount x exchangeRate` always holds on the row.
+    const user = await getUserById(session.user.id);
+    const money = resolveEntryAmounts({
+      amount,
+      originalAmount: body.originalAmount,
+      originalCurrency: body.originalCurrency,
+      exchangeRate: body.exchangeRate,
+      mainCurrency: user?.currency || "USD",
+    });
+
+    if (money.error) {
+      return NextResponse.json({ error: money.error }, { status: 400 });
     }
 
     if (Number.isNaN(new Date(date).getTime())) {
@@ -88,11 +96,14 @@ export async function POST(request) {
       categoryId,
       name,
       description,
-      amount: parsedAmount,
+      amount: money.amount,
       type,
       date,
       recurring,
       recurringInterval,
+      originalAmount: money.originalAmount,
+      originalCurrency: money.originalCurrency,
+      exchangeRate: money.exchangeRate,
     });
 
     return NextResponse.json(

@@ -5,8 +5,10 @@ import {
   getTransactionById,
   updateTransaction,
   deleteTransaction,
+  getUserById,
 } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { resolveEntryAmounts } from "@/lib/currency";
 
 export async function GET(request, { params }) {
   try {
@@ -61,13 +63,25 @@ export async function PATCH(request, { params }) {
 
     // --- Input Validation ---
     if (body.amount !== undefined) {
-      const amount = parseFloat(body.amount);
-      if (Number.isNaN(amount) || amount <= 0) {
-        return NextResponse.json(
-          { error: "Amount must be a positive number" },
-          { status: 400 }
-        );
+      const user = await getUserById(session.user.id);
+      const money = resolveEntryAmounts({
+        amount: body.amount,
+        originalAmount: body.originalAmount,
+        originalCurrency: body.originalCurrency,
+        exchangeRate: body.exchangeRate,
+        mainCurrency: user?.currency || "USD",
+      });
+
+      if (money.error) {
+        return NextResponse.json({ error: money.error }, { status: 400 });
       }
+
+      // Recomputed server-side so the stored value cannot disagree with the
+      // rate stored beside it.
+      body.amount = money.amount;
+      body.originalAmount = money.originalAmount;
+      body.originalCurrency = money.originalCurrency;
+      body.exchangeRate = money.exchangeRate;
     }
 
     if (body.date && Number.isNaN(new Date(body.date).getTime())) {
