@@ -78,8 +78,16 @@ A modern, intuitive personal finance management application built with Next.js
 > Pot balances are never converted on write either, so a rate change cannot make
 > it look like money moved in or out of your savings.
 
-Run `node scripts/migrate-multi-currency.js` once to add the columns. It is
-additive and safe to re-run.
+**Before first use, run the migration:**
+
+```bash
+npm run migrate:currency
+```
+
+It targets whichever database your environment points at — Turso when
+`TURSO_DATABASE_URL` is set in `.env.local`, otherwise the local `database.db`.
+If you use both, run it once for each. It only adds columns and backfills the
+new ones, never changes an existing amount, and is safe to re-run.
 
 ### 📱 **Installable App (PWA)**
 
