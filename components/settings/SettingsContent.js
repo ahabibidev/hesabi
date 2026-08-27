@@ -10,8 +10,9 @@ import PreferencesCard from "./PreferencesCard";
 import SaveSettingsCard from "./SaveSettingsCard";
 import SettingsSkeleton from "./SettingsSkeleton";
 import InstallAppCard from "@/components/pwa/InstallAppCard";
+import CurrencyCard from "./CurrencyCard";
 import { DEFAULT_PASSWORD_DATA } from "@/lib/constants";
-import { AVATAR_OPTIONS, CURRENCY_OPTIONS } from "@/lib/constants";
+import { AVATAR_OPTIONS } from "@/lib/constants";
 import { useUserProfile } from "@/hooks/useUserProfile";
 
 export default function SettingsContent() {
@@ -90,8 +91,7 @@ export default function SettingsContent() {
       userProfile.firstName !== originalProfile.firstName ||
       userProfile.lastName !== originalProfile.lastName ||
       userProfile.email !== originalProfile.email ||
-      userProfile.avatar !== originalProfile.avatar ||
-      userProfile.currency !== originalProfile.currency;
+      userProfile.avatar !== originalProfile.avatar;
 
     const passwordChanged =
       !isOAuthUser &&
@@ -118,13 +118,6 @@ export default function SettingsContent() {
   const handleAvatarSelect = useCallback(
     (avatarPath) => {
       setUserProfile((prev) => ({ ...prev, avatar: avatarPath }));
-    },
-    [setUserProfile],
-  );
-
-  const handleCurrencySelect = useCallback(
-    (currencyCode) => {
-      setUserProfile((prev) => ({ ...prev, currency: currencyCode }));
     },
     [setUserProfile],
   );
@@ -207,7 +200,6 @@ export default function SettingsContent() {
         lastName: userProfile.lastName,
         email: userProfile.email,
         avatar: userProfile.avatar,
-        currency: userProfile.currency,
       });
 
       if (!profileResult.success) {
@@ -296,13 +288,11 @@ export default function SettingsContent() {
             />
           )}
 
+          <CurrencyCard initialCurrency={userProfile.currency} />
+
           <InstallAppCard />
 
-          <PreferencesCard
-            userProfile={userProfile}
-            currencyOptions={CURRENCY_OPTIONS}
-            onCurrencySelect={handleCurrencySelect}
-          />
+          <PreferencesCard />
         </div>
       </div>
 

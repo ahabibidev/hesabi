@@ -1,7 +1,6 @@
 // components/ui/CurrencyAmountField.jsx
 "use client";
 
-import { useEffect } from "react";
 import { CURRENCY_OPTIONS } from "@/lib/constants";
 import {
   convertAmount,
@@ -36,16 +35,6 @@ export default function CurrencyAmountField({
 }) {
   const target = convertTo || mainCurrency;
   const isForeign = currency !== target;
-
-  // Seed the rate from settings whenever the currency pair changes, without
-  // clobbering a rate the user has deliberately typed over.
-  useEffect(() => {
-    if (!isForeign) return;
-    if (rate) return;
-
-    const suggested = rateBetween(currency, target, mainCurrency, rateMap);
-    if (suggested) onRateChange?.(String(Number(suggested.toFixed(8))));
-  }, [currency, target, mainCurrency, rateMap, isForeign, rate, onRateChange]);
 
   const numericRate = parseFloat(rate);
   const numericAmount = parseFloat(amount);
@@ -86,11 +75,7 @@ export default function CurrencyAmountField({
 
         <select
           value={currency}
-          onChange={(e) => {
-            onCurrencyChange(e.target.value);
-            // Force a re-seed for the new pair.
-            onRateChange?.("");
-          }}
+          onChange={(e) => onCurrencyChange(e.target.value)}
           disabled={disabled}
           aria-label="Currency"
           className="w-24 px-2 py-2.5 rounded-lg border border-text/20 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"

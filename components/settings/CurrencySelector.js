@@ -7,10 +7,11 @@ const CurrencySelector = memo(function CurrencySelector({
   currencyOptions,
   selectedCurrency,
   onSelect,
+  title = "Currency",
 }) {
   return (
     <div className="mb-8">
-      <h3 className="font-semibold mb-4">Currency</h3>
+      <h3 className="font-semibold mb-4">{title}</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {currencyOptions.map((currency) => (
           <button

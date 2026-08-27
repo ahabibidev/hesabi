@@ -86,13 +86,20 @@ export default function PotMoneyModal({
     };
   }, [pot, convertedAmount, isAdding]);
 
-  // Pre-fill the rate for the chosen pair; still editable per move.
-  useEffect(() => {
-    if (!isCrossCurrency || rate) return;
+  // Seeded when the currency is picked, not re-applied by an effect — an
+  // effect would refill the field the moment you cleared it to retype.
+  const suggestRate = (nextCurrency) => {
+    if (nextCurrency === currency) return "";
 
-    const suggested = rateBetween(entryCurrency, currency, mainCurrency, rateMap);
-    if (suggested) setRate(String(Number(suggested.toFixed(8))));
-  }, [isCrossCurrency, entryCurrency, currency, mainCurrency, rateMap, rate]);
+    const suggested = rateBetween(nextCurrency, currency, mainCurrency, rateMap);
+    return suggested ? String(Number(suggested.toFixed(8))) : "";
+  };
+
+  const handleEntryCurrencyChange = (nextCurrency) => {
+    setEntryCurrency(nextCurrency);
+    setRate(suggestRate(nextCurrency));
+    setError("");
+  };
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
@@ -342,11 +349,7 @@ export default function PotMoneyModal({
 
                   <select
                     value={entryCurrency}
-                    onChange={(e) => {
-                      setEntryCurrency(e.target.value);
-                      setRate("");
-                      setError("");
-                    }}
+                    onChange={(e) => handleEntryCurrencyChange(e.target.value)}
                     disabled={isLoading}
                     aria-label="Currency you are moving"
                     className="w-24 px-2 rounded-xl border border-text/20 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
@@ -519,11 +522,7 @@ export default function PotMoneyModal({
 
                 <select
                   value={entryCurrency}
-                  onChange={(e) => {
-                    setEntryCurrency(e.target.value);
-                    setRate("");
-                    setError("");
-                  }}
+                  onChange={(e) => handleEntryCurrencyChange(e.target.value)}
                   disabled={isLoading}
                   aria-label="Currency you are moving"
                   className="mt-3 w-28 mx-auto block px-2 py-1.5 rounded-lg border border-text/20 bg-background text-sm text-center focus:outline-none disabled:opacity-50"

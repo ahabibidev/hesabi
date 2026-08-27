@@ -139,6 +139,23 @@ export default function AddTransactionModal({
     }
   }, [formData.type, formData.categoryId, availableCategories]);
 
+  // The saved rate is only a starting point; once it is in the field it is
+  // ordinary user input and is never silently rewritten.
+  const suggestRate = (nextCurrency) => {
+    if (nextCurrency === mainCurrency) return "";
+
+    const suggested = rateBetween(nextCurrency, mainCurrency, mainCurrency, rateMap);
+    return suggested ? String(Number(suggested.toFixed(8))) : "";
+  };
+
+  const handleCurrencyChange = (nextCurrency) => {
+    setFormData((prev) => ({
+      ...prev,
+      currency: nextCurrency,
+      exchangeRate: suggestRate(nextCurrency),
+    }));
+  };
+
   const convertToDateInput = (dateStr) => {
     if (dateStr.includes("/")) {
       const [month, day, year] = dateStr.split("/");
@@ -294,6 +311,7 @@ export default function AddTransactionModal({
                 setFormData={setFormData}
                 mainCurrency={mainCurrency}
                 rateMap={rateMap}
+                onCurrencyChange={handleCurrencyChange}
               />
 
               {/* Desktop Buttons */}
@@ -378,6 +396,7 @@ export default function AddTransactionModal({
                 setFormData={setFormData}
                 mainCurrency={mainCurrency}
                 rateMap={rateMap}
+                onCurrencyChange={handleCurrencyChange}
               />
             </form>
           </motion.div>
@@ -423,6 +442,7 @@ function ModalFormContent({
   setFormData,
   mainCurrency,
   rateMap,
+  onCurrencyChange,
 }) {
   return (
     <div className="space-y-4">
@@ -483,9 +503,7 @@ function ModalFormContent({
         onAmountChange={(value) =>
           setFormData((prev) => ({ ...prev, amount: value }))
         }
-        onCurrencyChange={(value) =>
-          setFormData((prev) => ({ ...prev, currency: value }))
-        }
+        onCurrencyChange={onCurrencyChange}
         onRateChange={(value) =>
           setFormData((prev) => ({ ...prev, exchangeRate: value }))
         }
@@ -619,6 +637,7 @@ function MobileFormContent({
   setFormData,
   mainCurrency,
   rateMap,
+  onCurrencyChange,
 }) {
   return (
     <div className="space-y-4">
@@ -658,9 +677,7 @@ function MobileFormContent({
         onAmountChange={(value) =>
           setFormData((prev) => ({ ...prev, amount: value }))
         }
-        onCurrencyChange={(value) =>
-          setFormData((prev) => ({ ...prev, currency: value }))
-        }
+        onCurrencyChange={onCurrencyChange}
         onRateChange={(value) =>
           setFormData((prev) => ({ ...prev, exchangeRate: value }))
         }
