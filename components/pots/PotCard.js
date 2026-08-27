@@ -8,11 +8,13 @@ import PotActionsButtons from "./PotActionsButtons";
 import PotInfoFooter from "./PotInfoFooter";
 import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
 import { formatCurrency } from "@/lib/constants";
+import { convertAmount } from "@/lib/currency";
 import { getColorHex } from "@/utils/potsUtils";
 
 function PotCard({
   pot,
-  currency = "USD",
+  mainCurrency = "USD",
+  rateMap = {},
   openDropdownId,
   onDropdownToggle,
   onEdit,
@@ -24,6 +26,15 @@ function PotCard({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const colorHex = getColorHex(pot.color);
+
+  // The pot's own currency is the truth; the main-currency figure is a live
+  // conversion shown underneath, and moves with the rate as it should.
+  const potCurrency = pot.currency || mainCurrency;
+  const isForeign = potCurrency !== mainCurrency;
+
+  const savedInMain = isForeign
+    ? convertAmount(pot.saved, potCurrency, mainCurrency, mainCurrency, rateMap)
+    : null;
 
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
@@ -64,19 +75,30 @@ function PotCard({
         {/* Pot Content */}
         <div className="flex flex-col w-full mt-6 md:mt-8 gap-5">
           {/* Total Saved */}
-          <p className="flex justify-between w-full items-center">
+          <div className="flex justify-between w-full items-start">
             <span className="text-text/70">Total Saved:</span>
-            <span className="text-xl md:text-2xl font-bold">
-              {formatCurrency(pot.saved, currency)}
-            </span>
-          </p>
+            <div className="text-right">
+              <span className="text-xl md:text-2xl font-bold">
+                {formatCurrency(pot.saved, potCurrency)}
+              </span>
+
+              {/* What that is worth in the currency you think in */}
+              {isForeign && (
+                <p className="text-sm text-text/60 mt-0.5">
+                  {savedInMain !== null
+                    ? `≈ ${formatCurrency(savedInMain, mainCurrency)}`
+                    : `Set a ${potCurrency} rate to see this in ${mainCurrency}`}
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Progress Bar */}
           <PotProgressBar
             saved={pot.saved}
             target={pot.target}
             progressColor={colorHex}
-            currency={currency}
+            currency={potCurrency}
           />
 
           {/* Action Buttons */}
@@ -92,7 +114,7 @@ function PotCard({
             createdAt={pot.createdAt}
             target={pot.target}
             saved={pot.saved}
-            currency={currency}
+            currency={potCurrency}
           />
         </div>
       </div>

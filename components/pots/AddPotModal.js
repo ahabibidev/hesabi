@@ -4,7 +4,8 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
-import { THEME_COLORS } from "@/lib/constants";
+import { THEME_COLORS, CURRENCY_OPTIONS } from "@/lib/constants";
+import { currencySymbol } from "@/lib/currency";
 import { getColorHex } from "@/utils/potsUtils";
 
 export default function AddPotModal({
@@ -14,6 +15,7 @@ export default function AddPotModal({
   onUpdatePot,
   editingPot,
   existingPots = [],
+  mainCurrency = "USD",
   isLoading = false,
 }) {
   const [formData, setFormData] = useState({
@@ -21,6 +23,7 @@ export default function AddPotModal({
     description: "",
     target: "",
     color: "",
+    currency: mainCurrency,
   });
 
   const [errors, setErrors] = useState({});
@@ -49,6 +52,7 @@ export default function AddPotModal({
           description: editingPot.description || "",
           target: editingPot.target?.toString() || "",
           color: getColorHex(editingPot.color),
+          currency: editingPot.currency || mainCurrency,
         });
       } else {
         setFormData({
@@ -56,11 +60,12 @@ export default function AddPotModal({
           description: "",
           target: "",
           color: getFirstAvailableColor(),
+          currency: mainCurrency,
         });
       }
       setErrors({});
     }
-  }, [editingPot, isOpen, getFirstAvailableColor]);
+  }, [editingPot, isOpen, getFirstAvailableColor, mainCurrency]);
 
   const handleChange = useCallback(
     (e) => {
@@ -115,6 +120,7 @@ export default function AddPotModal({
         description: formData.description || formData.name,
         target: parseFloat(formData.target),
         color: formData.color,
+        currency: formData.currency,
         saved: editingPot?.saved || 0,
       };
 
@@ -185,6 +191,7 @@ export default function AddPotModal({
               className="p-5 overflow-y-auto max-h-[calc(90vh-80px)]"
             >
               <PotFormContent
+                mainCurrency={mainCurrency}
                 formData={formData}
                 errors={errors}
                 usedColors={usedColors}
@@ -268,6 +275,7 @@ export default function AddPotModal({
               className="px-4 pb-6 overflow-y-auto max-h-[calc(85vh-60px)]"
             >
               <PotFormContent
+                mainCurrency={mainCurrency}
                 formData={formData}
                 errors={errors}
                 usedColors={usedColors}
@@ -319,6 +327,7 @@ function PotFormContent({
   isLoading,
   handleChange,
   handleColorSelect,
+  mainCurrency = "USD",
   isMobile = false,
 }) {
   return (
@@ -360,31 +369,54 @@ function PotFormContent({
         />
       </div>
 
-      {/* Target Amount */}
+      {/* Target Amount & the pot's own currency */}
       <div>
         <label className="block text-xs font-medium text-foreground mb-1.5">
           Target Amount <span className="text-red-500">*</span>
         </label>
-        <div className="relative">
-          <span className="absolute left-3 top-2.5 text-text/50 text-sm">
-            $
-          </span>
-          <input
-            type="number"
-            name="target"
-            value={formData.target}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-2.5 text-text/50 text-sm">
+              {currencySymbol(formData.currency)}
+            </span>
+            <input
+              type="number"
+              name="target"
+              value={formData.target}
+              onChange={handleChange}
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              disabled={isLoading}
+              className={`w-full pl-7 pr-3 py-2.5 rounded-lg border text-sm ${
+                errors.target ? "border-red-500" : "border-text/20"
+              } bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50`}
+            />
+          </div>
+
+          <select
+            name="currency"
+            value={formData.currency}
             onChange={handleChange}
-            placeholder="0.00"
-            min="0"
-            step="0.01"
             disabled={isLoading}
-            className={`w-full pl-7 pr-3 py-2.5 rounded-lg border text-sm ${
-              errors.target ? "border-red-500" : "border-text/20"
-            } bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50`}
-          />
+            aria-label="Pot currency"
+            className="w-24 px-2 py-2.5 rounded-lg border border-text/20 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+          >
+            {CURRENCY_OPTIONS.map((option) => (
+              <option key={option.code} value={option.code}>
+                {option.code}
+              </option>
+            ))}
+          </select>
         </div>
         {errors.target && (
           <p className="mt-1 text-xs text-red-500">{errors.target}</p>
+        )}
+        {formData.currency !== mainCurrency && (
+          <p className="mt-1.5 text-xs text-text/60">
+            This pot holds {formData.currency}. Its balance stays in{" "}
+            {formData.currency} and will not move when the rate changes.
+          </p>
         )}
       </div>
 

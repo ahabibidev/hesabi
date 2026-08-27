@@ -16,6 +16,7 @@ export default function TransactionsClientWrapper({
   initialTransactions,
   categories = [],
   currency = "USD",
+  rateMap = {},
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -184,6 +185,9 @@ export default function TransactionsClientWrapper({
             date: newTransaction.date,
             recurring: newTransaction.recurring || false,
             recurringInterval: newTransaction.recurringInterval || null,
+            originalAmount: newTransaction.originalAmount,
+            originalCurrency: newTransaction.originalCurrency,
+            exchangeRate: newTransaction.exchangeRate,
           }),
         });
 
@@ -249,6 +253,9 @@ export default function TransactionsClientWrapper({
               date: updatedTransaction.date,
               recurring: updatedTransaction.recurring || false,
               recurringInterval: updatedTransaction.recurringInterval || null,
+              originalAmount: updatedTransaction.originalAmount,
+              originalCurrency: updatedTransaction.originalCurrency,
+              exchangeRate: updatedTransaction.exchangeRate,
             }),
           },
         );
@@ -364,6 +371,8 @@ export default function TransactionsClientWrapper({
         onUpdateTransaction={handleUpdateTransaction}
         editingTransaction={editingTransaction}
         categories={categories}
+        mainCurrency={currency}
+        rateMap={rateMap}
         isLoading={isLoading}
       />
     </>

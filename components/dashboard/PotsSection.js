@@ -13,10 +13,11 @@ export default function PotsSection({
   const displayPots = potsData.map((pot) => ({
     name: pot.name,
     // Handle both old format (amount string) and new format (saved_amount number)
+    // Each pot is shown in its own currency; a pot with none follows the main.
     amount:
       typeof pot.amount === "string"
         ? pot.amount
-        : formatCurrency(pot.saved_amount || 0, currency),
+        : formatCurrency(pot.saved_amount || 0, pot.currency || currency),
     color: pot.color || "bg-primary",
     colorHex: pot.color && pot.color.startsWith("#") ? pot.color : null,
   }));

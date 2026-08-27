@@ -24,13 +24,14 @@ export default async function PotsPage() {
     redirect("/login");
   }
 
-  const { user, pots } = data;
+  const { user, pots, mainCurrency, rateMap } = data;
 
   return (
     <DashboardLayout>
       <PotsClientWrapper
         initialPots={pots}
-        currency={user?.currency || "USD"}
+        currency={mainCurrency || user?.currency || "USD"}
+        rateMap={rateMap || {}}
       />
     </DashboardLayout>
   );

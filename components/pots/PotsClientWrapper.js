@@ -9,7 +9,11 @@ import PotCard from "@/components/pots/PotCard";
 import AddPotModal from "@/components/pots/AddPotModal";
 import PotMoneyModal from "@/components/pots/PotMoneyModal";
 
-export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
+export default function PotsClientWrapper({
+  initialPots,
+  currency = "USD",
+  rateMap = {},
+}) {
   const router = useRouter();
   const [pots, setPots] = useState(initialPots);
   const [isPotModalOpen, setIsPotModalOpen] = useState(false);
@@ -44,7 +48,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
 
   // Handle confirm add money
   const handleConfirmAddMoney = useCallback(
-    async (potId, amount) => {
+    async (potId, amount, conversion) => {
       setIsLoading(true);
       try {
         const response = await fetch(`/api/pots/${potId}/deposit`, {
@@ -52,7 +56,12 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ amount: parseFloat(amount) }),
+          body: JSON.stringify({
+            amount: parseFloat(amount),
+            originalAmount: conversion?.originalAmount,
+            originalCurrency: conversion?.originalCurrency,
+            exchangeRate: conversion?.exchangeRate,
+          }),
         });
 
         const text = await response.text();
@@ -96,7 +105,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
 
   // Handle confirm withdraw
   const handleConfirmWithdraw = useCallback(
-    async (potId, amount) => {
+    async (potId, amount, conversion) => {
       setIsLoading(true);
       try {
         const response = await fetch(`/api/pots/${potId}/withdraw`, {
@@ -104,7 +113,12 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ amount: parseFloat(amount) }),
+          body: JSON.stringify({
+            amount: parseFloat(amount),
+            originalAmount: conversion?.originalAmount,
+            originalCurrency: conversion?.originalCurrency,
+            exchangeRate: conversion?.exchangeRate,
+          }),
         });
 
         if (!response.ok) {
@@ -149,6 +163,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
             color: newPot.color,
             icon: newPot.icon || "piggy-bank",
             deadline: newPot.deadline || null,
+            currency: newPot.currency || currency,
           }),
         });
 
@@ -165,6 +180,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
           description: newPot.description || newPot.name,
           target: parseFloat(newPot.target),
           saved: 0,
+          currency: newPot.currency || currency,
           color: newPot.color,
           progressColor: newPot.color,
           icon: newPot.icon || "piggy-bank",
@@ -181,7 +197,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
         setIsLoading(false);
       }
     },
-    [router],
+    [router, currency],
   );
 
   const handleUpdatePot = useCallback(
@@ -200,6 +216,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
             color: updatedPot.color,
             icon: updatedPot.icon || "piggy-bank",
             deadline: updatedPot.deadline || null,
+            currency: updatedPot.currency || null,
           }),
         });
 
@@ -223,6 +240,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
                   progressColor: data.pot.color,
                   icon: data.pot.icon,
                   deadline: data.pot.deadline,
+                  currency: data.pot.currency || pot.currency,
                 }
               : pot,
           ),
@@ -337,7 +355,8 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
             <PotCard
               key={pot.id}
               pot={pot}
-              currency={currency}
+              mainCurrency={currency}
+              rateMap={rateMap}
               openDropdownId={openDropdownId}
               onDropdownToggle={handleDropdownToggle}
               onEdit={handleEditPot}
@@ -357,6 +376,7 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
         onUpdatePot={handleUpdatePot}
         editingPot={editingPot}
         existingPots={pots}
+        mainCurrency={currency}
         isLoading={isLoading}
       />
 
@@ -365,7 +385,8 @@ export default function PotsClientWrapper({ initialPots, currency = "USD" }) {
         onClose={handleCloseMoneyModal}
         pot={selectedPot}
         type={moneyModalType}
-        currency={currency}
+        mainCurrency={currency}
+        rateMap={rateMap}
         onConfirm={
           moneyModalType === "add"
             ? handleConfirmAddMoney

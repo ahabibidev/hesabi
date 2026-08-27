@@ -33,7 +33,8 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { name, description, targetAmount, color, icon, deadline } = body;
+    const { name, description, targetAmount, color, icon, deadline, currency } =
+      body;
 
     if (!name || !targetAmount) {
       return NextResponse.json(
@@ -49,6 +50,7 @@ export async function POST(request) {
       color,
       icon,
       deadline,
+      currency: currency || null,
     });
 
     return NextResponse.json(

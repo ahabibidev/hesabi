@@ -62,6 +62,33 @@ A modern, intuitive personal finance management application built with Next.js
 - Customizable avatars
 - Multi-currency support (USD, EUR, GBP, AFN, IRR, INR, PKR)
 
+### 💱 **Multiple Currencies at Once**
+
+- Pick a **main currency** — every balance, budget and total is reported in it
+- Enter any transaction in another currency; it is converted on the way in
+- Savings pots hold a currency of their own, with the main-currency value
+  shown underneath
+- Your own exchange rates, editable per entry for the rate you actually got
+
+> **Why the rate is stored on each record:** the rate is frozen when you save.
+> A single global rate would mean that updating it silently rewrote what your
+> past spending was worth — a 6,500 AFN grocery run from March would quietly
+> change value every time the rate moved. Here it keeps the rate it was made at.
+>
+> Pot balances are never converted on write either, so a rate change cannot make
+> it look like money moved in or out of your savings.
+
+**Before first use, run the migration:**
+
+```bash
+npm run migrate:currency
+```
+
+It targets whichever database your environment points at — Turso when
+`TURSO_DATABASE_URL` is set in `.env.local`, otherwise the local `database.db`.
+If you use both, run it once for each. It only adds columns and backfills the
+new ones, never changes an existing amount, and is safe to re-run.
+
 ### 📱 **Installable App (PWA)**
 
 - Install to your home screen or desktop and launch in a standalone window

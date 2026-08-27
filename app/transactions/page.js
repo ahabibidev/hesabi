@@ -36,13 +36,14 @@ async function TransactionsContent() {
     redirect("/login");
   }
 
-  const { user, transactions, categories } = data;
+  const { user, transactions, categories, mainCurrency, rateMap } = data;
 
   return (
     <TransactionsClientWrapper
       initialTransactions={transactions}
       categories={categories}
-      currency={user?.currency || "USD"}
+      currency={mainCurrency || user?.currency || "USD"}
+      rateMap={rateMap || {}}
     />
   );
 }

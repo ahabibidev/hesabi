@@ -2,16 +2,11 @@
 "use client";
 
 import { memo, useState } from "react";
-import CurrencySelector from "./CurrencySelector";
 import ThemeToggle from "./ThemeToggle";
 import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
 import { signOutAndClearCaches } from "@/lib/pwa";
 
-const PreferencesCard = memo(function PreferencesCard({
-  userProfile,
-  currencyOptions,
-  onCurrencySelect,
-}) {
+const PreferencesCard = memo(function PreferencesCard() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState(null);
@@ -41,12 +36,6 @@ const PreferencesCard = memo(function PreferencesCard({
     <>
       <div className="shadow-xl bg-input-background border border-text/10 rounded-2xl p-6">
         <h2 className="text-xl font-bold mb-6">Preferences</h2>
-
-        <CurrencySelector
-          currencyOptions={currencyOptions}
-          selectedCurrency={userProfile.currency}
-          onSelect={onCurrencySelect}
-        />
 
         <ThemeToggle />
 
